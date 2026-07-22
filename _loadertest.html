@@ -1,0 +1,15 @@
+<!doctype html><meta charset="utf-8"><title>loader test</title>
+<div style="background:#111;color:#fff;padding:20px">這是模擬 WordPress 佈景的外層區域（上）</div>
+<div id="guan-root">載入中…</div>
+<div style="background:#111;color:#fff;padding:20px">這是模擬 WordPress 佈景的外層區域（下）</div>
+<script>
+(function(){
+  fetch('https://lunch7776-eng.github.io/pt-sales-pages/guanguan-embed.html').then(function(r){return r.text()}).then(function(t){
+    var d=new DOMParser().parseFromString(t,'text/html');
+    var root=document.getElementById('guan-root'); root.innerHTML='';
+    d.querySelectorAll('style').forEach(function(s){root.appendChild(document.importNode(s,true))});
+    var host=d.getElementById('guan-lp'); if(host) root.appendChild(document.importNode(host,true));
+    d.querySelectorAll('script').forEach(function(s){var x=document.createElement('script');x.textContent=s.textContent;document.body.appendChild(x)});
+  });
+})();
+</script>
