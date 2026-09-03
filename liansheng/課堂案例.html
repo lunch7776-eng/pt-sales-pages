@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>課堂案例庫｜短影音帶客 AI 工作流程・聯盛地產專場</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Oswald:wght@500;600;700&display=swap');
+:root{--bg:#08080a;--ink:#fff;--muted:#9a9aa2;--dim:#6a6a72;--red:#E4002B;--red-soft:#ff3355;--red-deep:#a80020;--card:#141417;--line:#2a2a31;--green:#3ddc84;--amber:#f5b342}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:"Noto Sans TC","PingFang TC",sans-serif;line-height:1.6}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1080px;margin:0 auto;padding:40px 28px 90px}
+
+.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:34px;flex-wrap:wrap;gap:16px}
+.logo{display:flex;align-items:center;gap:11px}
+.logo .mark{width:36px;height:36px;background:var(--red);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:Oswald;font-weight:700;font-size:23px}
+.logo b{font-family:Oswald;letter-spacing:2px;font-size:16px;display:block}
+.logo span{font-size:10px;color:var(--muted);letter-spacing:5px}
+.deckbtn{display:inline-flex;align-items:center;gap:10px;background:var(--red);font-weight:700;font-size:16px;padding:13px 26px;border-radius:9px;box-shadow:0 8px 30px rgba(228,0,43,.35);transition:.15s}
+.deckbtn:hover{transform:translateY(-2px)}
+
+h1{font-size:44px;font-weight:900;line-height:1.15}
+h1 .r{color:var(--red)}
+.sub{color:var(--muted);margin-top:10px;font-size:16px}
+
+.nav{position:sticky;top:0;background:rgba(8,8,10,.92);backdrop-filter:blur(8px);z-index:9;display:flex;gap:8px;padding:14px 0;margin:26px 0 8px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.nav a{font-size:14px;font-weight:700;padding:8px 16px;border-radius:999px;border:1px solid var(--line);color:#d5d5db;transition:.15s}
+.nav a:hover{border-color:var(--red);color:#fff}
+.nav a.bad{border-color:var(--red-deep);color:var(--red-soft)}
+.nav a.good{border-color:#1f6b3e;color:var(--green)}
+
+section{margin-top:44px}
+.sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:6px;flex-wrap:wrap}
+.sec-head .kick{font-family:Oswald;font-weight:600;letter-spacing:3px;font-size:13px;color:var(--red);text-transform:uppercase}
+h2{font-size:30px;font-weight:900}
+h3{font-size:20px;font-weight:900;margin:26px 0 8px;display:flex;align-items:center;gap:10px}
+h3 .tag{font-family:Oswald;font-size:12px;letter-spacing:2px;padding:4px 10px;border-radius:6px;background:rgba(255,255,255,.07);color:#c9c9d0}
+h3 .tag.bad{background:rgba(228,0,43,.16);color:var(--red-soft)}
+h3 .tag.good{background:rgba(61,220,132,.13);color:var(--green)}
+h3 .tag.warn{background:rgba(245,179,66,.14);color:var(--amber)}
+.sec-note{color:var(--muted);font-size:15px;margin-bottom:14px}
+.sec-note b{color:var(--red-soft)}
+.why{color:#c9c9d0;font-size:14.5px;margin:0 0 14px;padding-left:14px;border-left:3px solid var(--line)}
+.why b{color:#fff}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+.vid{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:18px 20px;display:block;transition:.15s;position:relative}
+.vid:hover{border-color:var(--red);transform:translateY(-2px)}
+.vid .t{font-size:16.5px;font-weight:700;line-height:1.4;padding-right:22px}
+.vid .d{color:var(--muted);font-size:13.5px;margin-top:6px;line-height:1.55}
+.vid .m{margin-top:9px;font-size:13px;color:var(--muted);display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.badge{display:inline-block;font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:6px;letter-spacing:.5px}
+.badge.views{background:rgba(228,0,43,.16);color:var(--red-soft)}
+.badge.hi{background:rgba(61,220,132,.13);color:var(--green)}
+.badge.plat{background:rgba(255,255,255,.07);color:#c9c9d0}
+.badge.live{background:rgba(61,220,132,.13);color:var(--green)}
+.badge.loc{background:rgba(255,255,255,.04);color:var(--dim);border:1px solid var(--line)}
+.vid .arrow{position:absolute;right:16px;top:16px;color:var(--dim);font-family:Oswald;font-size:14px}
+.vid:hover .arrow{color:var(--red)}
+
+.callout{background:linear-gradient(90deg,#1a0e11,#0e0c0d);border:1px solid var(--red-deep);border-radius:13px;padding:18px 24px;margin:16px 0 6px;font-size:16px}
+.callout b{color:var(--red-soft)}
+.callout.g{background:linear-gradient(90deg,#0d1a12,#0c0e0d);border-color:#1f6b3e}
+.callout.g b{color:var(--green)}
+.warn{background:#121216;border:1px solid var(--line);border-left:3px solid var(--red);border-radius:11px;padding:15px 22px;margin:16px 0 6px;font-size:14.5px;color:#c9c9d0}
+.warn b{color:#fff}
+
+table.cmp{width:100%;border-collapse:collapse;margin-top:18px;font-size:14px;table-layout:fixed}
+table.cmp th{background:var(--red);color:#fff;text-align:left;padding:11px 13px;font-weight:700;font-size:13px;letter-spacing:1px}
+table.cmp td{padding:11px 13px;border-bottom:1px solid var(--line);color:#d7d7dd;vertical-align:top}
+table.cmp tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+table.cmp td b{color:#fff}
+table.cmp .no{color:var(--red-soft);font-weight:900}
+table.cmp .ok{color:var(--green);font-weight:900}
+table.cmp .mid{color:var(--amber);font-weight:900}
+table.cmp .n{font-family:Oswald,"Noto Sans TC",sans-serif;letter-spacing:.3px}
+
+
+/* 開拍剪輯案例 */
+.ba{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:16px}
+.ba .clip{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;text-align:center}
+.ba .clip.after{border-color:#1f6b3e}
+.ba .lab{font-family:Oswald;letter-spacing:2px;font-size:12px;color:var(--muted);margin-bottom:8px}
+.ba .clip.after .lab{color:var(--green)}
+.ba h4{font-size:17px;font-weight:900;margin-bottom:10px}
+.ba video{width:100%;max-width:340px;aspect-ratio:9/16;background:#000;border-radius:10px;display:block;margin:0 auto}
+.ba .note{color:var(--muted);font-size:13.5px;margin-top:10px;line-height:1.55}
+@media (max-width:640px){.ba{grid-template-columns:1fr}}
+.divider{height:1px;background:var(--line);margin:50px 0 0}
+footer{margin-top:56px;color:var(--dim);font-size:13px;text-align:center;font-family:Oswald;letter-spacing:2px}
+@media (max-width:640px){h1{font-size:32px}.grid{grid-template-columns:1fr}table.cmp{font-size:12.5px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="top">
+  <div class="logo"><div class="mark">P</div><div><b>PERFECT TREND</b><span>原創課程</span></div></div>
+  <a class="deckbtn" href="index.html">▶ 開啟課程簡報</a>
+</div>
+
+<h1>課堂案例庫 <span class="r">CASE LIBRARY</span></h1>
+<div class="sub">短影音帶客 AI 工作流程・聯盛地產專場｜點卡片直接開影片。<b style="color:#fff">「實查」是 2026-09 查核當時的公開觀看數；「成果紀錄」是玩美趨勢學員與業主的授權素材數字。</b>下面「有人看」的每一支都是<b style="color:#fff">房仲本人的影片</b>，點開就是那支片，觀看數都超過 10 萬。</div>
+
+<div class="nav">
+  <a href="#cmp">📊 風格對照表</a>
+  <a href="#bad" class="bad">🚫 這樣拍沒人看</a>
+  <a href="#good" class="good">✅ 這樣拍有人看</a>
+  <a href="#kaipai">🎬 開拍剪輯案例</a>
+  <a href="#proof">🏆 學員實證</a>
+  <a href="#read">📄 延伸閱讀</a>
+</div>
+
+<!-- ============ 風格對照表 ============ -->
+<section id="cmp">
+  <div class="sec-head"><span class="kick">Overview</span><h2>📊 風格對照表：你該拍什麼、不該拍什麼</h2></div>
+  <div class="sec-note">分類的軸是「片是怎麼拍的」，不是題材。每一列對應簡報的一頁，數字全部來自下面的影片。</div>
+  <table class="cmp">
+    <tr><th style="width:8%">判定</th><th style="width:15%">風格</th><th style="width:31%">怎麼認出來</th><th style="width:32%">數字（2026-09 實查）</th><th style="width:14%">對應簡報</th></tr>
+    <tr><td class="no">沒人看</td><td><b>建案形象片</b></td><td>橫式、1–2 分鐘、空拍開場、管弦樂、沒有人講話</td><td class="n">7 支建商官方形象片：142–492 次</td><td>P4 死因一</td></tr>
+    <tr><td class="no">沒人看</td><td><b>3D 動畫公設片</b></td><td>全 CG、鏡頭飛過公設、字卡打規格</td><td class="n">3 支：497–2,833 次</td><td>P4 死因一</td></tr>
+    <tr><td class="no">沒人看</td><td><b>空鏡＋規格表</b></td><td>樣品屋走一圈、旁白唸坪數建材、沒有觀點</td><td class="n">建商自營開箱：1,980 次</td><td>P4 死因二</td></tr>
+    <tr><td class="no">沒人看</td><td><b>工地日常（沒觀點）</b></td><td>拍工地、拍董事長巡視，沒講出你不知道的事</td><td class="n">471 次</td><td>P15 情緒是必需品</td></tr>
+    <tr><td class="ok">有人看</td><td><b>一鏡到底＋段子</b></td><td>30 秒不剪、人出鏡、一句記得住的台詞</td><td class="n">高雄房仲「跑男」：IG 204.4 萬／FB 178 萬</td><td>P10・P15</td></tr>
+    <tr><td class="ok">有人看</td><td><b>開箱好宅日更</b></td><td>一個物件拍多支、天天發、畫面直接開門</td><td class="n">那對房仲夫妻：264.2 萬／212.3 萬</td><td>P11 帶你走進去</td></tr>
+    <tr><td class="ok">有人看</td><td><b>標題有數字</b></td><td>「前院 200 坪」「888 萬兩房兩衛」——標題就是封面</td><td class="n">前院 200 坪：212.3 萬／南屯 888 萬：18 萬</td><td>P17 具體數字</td></tr>
+    <tr><td class="ok">有人看</td><td><b>先講缺點／知識避坑</b></td><td>「印鑑證明」「2、3 樓能買嗎」「授權書別亂簽」</td><td class="n">高雄房仲家虹：137.4 萬／110.3 萬／67.9 萬</td><td>P11 避坑警告</td></tr>
+    <tr><td class="ok">有人看</td><td><b>業務人設・日常</b></td><td>帶看時的代溝、我自己買的房子</td><td class="n">家虹：120.8 萬／15.9 萬</td><td>P11 業務的一天</td></tr>
+    <tr><td class="ok">有人看</td><td><b>高雄在地驗屋教學</b></td><td>撥款前必看——你不講，別人會講</td><td class="n">24.4 萬（29 分鐘長片）</td><td>P19 預售屋</td></tr>
+  </table>
+  <div class="callout">💬 一句話：<b>你手上的案子不缺畫面，缺的是「有人講、講出觀點、標題有數字」。</b>下面每一支都在證明這三件事。</div>
+</section>
+
+<!-- ============ 沒人看 ============ -->
+<section id="bad">
+  <div class="sec-head"><span class="kick">Part 1 — What NOT to do</span><h2>🚫 這樣拍沒人看</h2></div>
+  <div class="warn"><b>先說明：</b>這一區全部是<b>外縣市</b>建商的公開影片。我們只看「片型 × 觀看數」的關係，<b>不評論任何一家</b>。這些片的製作費都不低——問題不在製作，在方法。</div>
+
+  <h3>風格 1・建案形象片 <span class="tag bad">P4 死因一</span></h3>
+  <div class="why">橫式、1–2 分鐘、空拍開場、管弦樂、全程沒有人講話。<b>七支建商官方形象片，沒有一支破 500 次。</b>你看過的建案廣告，八成長這樣。</div>
+  <div class="grid">
+    <a class="vid" href="https://www.youtube.com/watch?v=uhcnj1bgMvY" target="_blank"><div class="t">宜田建設｜宜田頤恬 形象影片</div><div class="d">標準模板：空拍→建築外觀→公設→Logo。</div><div class="m"><span class="badge plat">YouTube 1:48</span><span class="badge loc">台南</span><span class="badge views">實查 174 次</span></div><span class="arrow">↗</span></a>
+    <a class="vid" href="https://www.youtube.com/watch?v=QmjlEXZ_zFQ" target="_blank"><div class="t">泉宇建設｜《泉宇大隱》建案形象影片</div><div class="d">兩分鐘，2022 年上片，四年累積 142 次。</div><div class="m"><span class="badge plat">YouTube 2:01</span><span class="badge loc">彰化</span><span class="badge views">實查 142 次</span></div><span class="arrow">↗</span></a>
+    <a class="vid" href="https://www.youtube.com/watch?v=JW-2K7XDOTA" target="_blank"><div class="t">長虹天韻《公設形象》建案形象影片</div><div class="d">2026 年 2 月的新片，導演、製片、燈光、攝影 credit 一應俱全。</div><div class="m"><span class="badge plat">YouTube 1:31</span><span class="badge loc">台北</span><span class="badge views">實查 214 次</span></div><span class="arrow">↗</span></a>
+    <a class="vid" href="https://www.youtube.com/watch?v=Nq-NivLndSw" target="_blank"><div class="t">晴山建設｜御花園 建案形象影片</div><div class="d">跟宜田是同一家製作公司的同一套模板。</div><div class="m"><span class="badge plat">YouTube 1:47</span><span class="badge loc">台中</span><span class="badge views">實查 256 次</span></div><span class="arrow">↗</span></a>
+    <a class="vid" href="https://www.youtube.com/watch?v=W0hkXS10bKU" target="_blank"><div class="t">富宇建設｜2019 全國前五大建設 形象影片</div><div class="d">全國前五大建商的企業形象片，五年 422 次。</div><div class="m"><span class="badge plat">YouTube 1:18</span><span class="badge loc">台中</span><span class="badge views">實查 422 次</span></div><span class="arrow">↗</span></a>
+    <a class="vid" href="https://www.youtube.com/watch?v=nqQlgYLH4MQ" target="_blank"><div class="t">國泰建設｜建築簡介／形象影片</div><div class="d">上市建商，2025 年 12 月上片。</div><div class="m"><span class="badge plat">YouTube 1:29</span><span class="badge loc">台北</span><span class="badge views">實查 440 次</span></div><span class="arrow">↗</span></a>
+    <a class="vid" href="https://www.youtube.com/watch?v=IieDXqXS_5E" target="_blank"><div class="t">陶喜建設｜陶喜琢悅 形象影片</div><div class="d">這一批裡最高的一支，也不到 500。</div><div class="m"><span class="badge plat">YouTube 1:37</span><span class="badge loc">台南</span><span class="badge views">實查 492 次</span></div><span class="arrow">↗</span></a>
+  </div>
+
+  <h3>風格 2・3D 動畫公設片 <span class="tag bad">P4 死因一</span></h3>
+  <div class="why">全 CG、鏡頭飛過公設、字卡打規格。<b>製作成本最高、觀看最低的一種片。</b></div>
+  <div class="grid">
+    <a class="vid" href="https://www.youtube.com/watch?v=SWkuV8bN0ZI" target="_blank"><div class="t">光明鼎《未來式豪宅篇》建案 3D 動畫</div><div class="d">動畫特效合成，56 秒。</div><div class="m"><span class="badge plat">YouTube 0:56</span><span class="badge loc">桃園蘆竹</span><span class="badge views">實查 646 次</span></div><span class="arrow">↗</span></a>
+    <a class="vid" href="https://www.youtube.com/watch?v=lgcOw8spkY0" target="_blank"><div class="t">元利建設 新板【國家世紀館】3D 建築工法動畫 CF</div><div class="d">連工法都用 3D 講。</div><div class="m"><span class="badge plat">YouTube 1:03</span><span class="badge loc">新北板橋</span><span class="badge views">實查 497 次</span></div><span class="arrow">↗</span></a>
+    <a class="vid" href="https://www.youtube.com/watch?v=ESzOw3WoyZg" target="_blank"><div class="t">弈富建設｜漁上游 5 期 建案 3D 動畫短片</div><div class="d">這一區最高的一支：34 秒、五年、2,833 次。</div><div class="m"><span class="badge plat">YouTube 0:34</span><span class="badge loc">新北淡水</span><span class="badge views">實查 2,833 次</span></div><span class="arrow">↗</span></a>
+  </div>
+
+  <h3>風格 3・空鏡＋規格表（建商自營開箱） <span class="tag bad">P4 死因二</span></h3>
+  <div class="why">建商也知道要拍「開箱」了，格式對了、觀看還是低。<b>點開看，想一想差在哪</b>——提示：誰在講、有沒有觀點、標題有沒有數字。</div>
+  <div class="grid">
+    <a class="vid" href="https://www.youtube.com/watch?v=524VBMvSQUs" target="_blank"><div class="t">茂德建設【建案 Kai 箱】芳洲漾｜Linda 專案來開箱</div><div class="d">建商自營、業務出鏡、用了「開箱」兩個字——三年 1,980 次。</div><div class="m"><span class="badge plat">YouTube 1:32</span><span class="badge loc">新北五股</span><span class="badge views">實查 1,980 次</span></div><span class="arrow">↗</span></a>
+    <a class="vid" href="https://www.youtube.com/watch?v=TRvywRVSSSI" target="_blank"><div class="t">興富發鉑悦 3 房 39 坪 樣品屋介紹</div><div class="d">這一組的例外（18,753）。看的時候想：是片好，還是 A7 熱區加建商投放？</div><div class="m"><span class="badge plat">YouTube 3:43</span><span class="badge loc">桃園龜山 A7</span><span class="badge views">實查 18,753 次</span></div><span class="arrow">↗</span></a>
+  </div>
+
+  <h3>風格 4・工地日常（沒有觀點） <span class="tag bad">P15 情緒是必需品</span></h3>
+  <div class="why">建商自己拍工地、拍董事長關心同仁。畫面是真的，但<b>沒有講出任何一件你不知道的事。</b></div>
+  <div class="grid">
+    <a class="vid" href="https://www.youtube.com/watch?v=EQU9s4cF4fs" target="_blank"><div class="t">欣雄建設｜永康「時代至上」工地日常・董事長親臨</div><div class="d">471 次。你手上的預售案也有工地——差別在你要講什麼。</div><div class="m"><span class="badge plat">YouTube 1:03</span><span class="badge loc">台南永康</span><span class="badge views">實查 471 次</span></div><span class="arrow">↗</span></a>
+  </div>
+  <div class="callout">💬 這一區的結論：<b>不是預算問題。</b>上面每一支的製作費，都比下面任何一支高。</div>
+</section>
+
+<!-- ============ 有人看 ============ -->
+<section id="good">
+  <div class="sec-head"><span class="kick">Part 2 — What works</span><h2>✅ 這樣拍有人看</h2></div>
+  <div class="sec-note">以下每一支都是<b>房仲本人拍的影片</b>，點開就是那支片，觀看數都超過 10 萬（2026-09 實查）。三位主角：高雄的跑男、台中的那對房仲夫妻、高雄的家虹——兩個跟你同城。</div>
+
+  <h3>風格 A・一鏡到底＋段子（人給情緒） <span class="tag good">P10・P15</span></h3>
+  <div class="why">高雄房仲店長王奕淳的「跑男」系列：30 秒不剪、穿襯衫皮鞋邊跑邊追客戶。2 月開始拍，不到半年破百萬。<b>沒有一顆空拍鏡頭，沒有一張規格字卡。</b>他私下是 I 人——不敢出鏡的你，先看這五支。</div>
+  <div class="grid">
+    <a class="vid" href="https://www.instagram.com/reel/DKJ-NQOSSXU/" target="_blank"><div class="t">要跑多少次，才能服務你一次？</div><div class="d">跑男系列最高的一支。一句台詞、一個動作、一個反轉。</div><div class="m"><span class="badge plat">Instagram Reel</span><span class="badge loc">高雄</span><span class="badge hi">實查 204.4 萬</span></div><span class="arrow">↗</span></a>
+    <a class="vid" href="https://www.facebook.com/reel/1733381877563625" target="_blank"><div class="t">真正的跑業務（5）</div><div class="d">同一個系列的第五集——一個梗可以拍成一季。</div><div class="m"><span class="badge plat">Facebook Reel</span><span class="badge loc">高雄</span><span class="badge hi">實查 178 萬</span></div><span class="arrow">↗</span></a>
+    <a class="vid" href="https://www.instagram.com/reel/DI1Ev38ywAd/" target="_blank"><div class="t">要跑多快，才能讓你看到我</div><div class="d">標題是問句，答案在片尾。</div><div class="m"><span class="badge plat">Instagram Reel</span><span class="badge loc">高雄</span><span class="badge hi">實查 84.2 萬</span></div><span class="arrow">↗</span></a>
+    <a class="vid" href="https://www.facebook.com/reel/1408729350031924" target="_blank"><div class="t">臺灣以房養老的業務，爆衝了</div><div class="d">把行業話題（以房養老）套進跑男框架。</div><div class="m"><span class="badge plat">Facebook Reel</span><span class="badge loc">高雄</span><span class="badge hi">實查 72 萬</span></div><span class="arrow">↗</span></a>
+    <a class="vid" href="https://www.instagram.com/reel/DHVg2ZjyAu6/" target="_blank"><div class="t">同學不來做房仲嗎？我一定會追到你！</div><div class="d">連招募都能用同一個梗。</div><div class="m"><span class="badge plat">Instagram Reel</span><span class="badge loc">高雄</span><span class="badge hi">實查 12.5 萬</span></div><span class="arrow">↗</span></a>
+  </div>
+  <div class="callout g">🔧 你的版本：<b>一句客戶真的說過的話 ＋ 一個你真的做過的動作。</b>「我已經幫你議到 85 折，你為什麼不買了？」——每個案場都有自己的那一句。</div>
+
+  <h3>風格 B・開箱好宅日更（畫面直接開門） <span class="tag good">P11 帶你走進去</span></h3>
+  <div class="why">台中「那對房仲夫妻」Andy 與文凌，永慶不動產西屯安和創意店。從 2 粉開始日更，一個月後 20 組客戶主動加 LINE，3 個月成為百萬經紀人。<b>玩美趨勢學員。</b></div>
+  <div class="grid">
+    <a class="vid" href="https://www.instagram.com/reel/C_ke7H4yFxU/" target="_blank"><div class="t">明天要去露營⋯還是要賞屋的？南屯區別墅</div><div class="d">帳號最高的一支。5.2 萬讚、683 則留言。開場一句生活話，畫面直接進別墅。</div><div class="m"><span class="badge plat">Instagram Reel</span><span class="badge loc">台中南屯</span><span class="badge hi">實查 264.2 萬</span></div><span class="arrow">↗</span></a>
+    <a class="vid" href="https://www.instagram.com/reel/DAagfhvyKkn/" target="_blank"><div class="t">前院 200 坪，車子隨便停</div><div class="d">標題就是一個數字＋一個畫面。不報總價、不報坪數，先給你最強的那個點。</div><div class="m"><span class="badge plat">Instagram Reel</span><span class="badge loc">台中／彰化</span><span class="badge hi">實查 212.3 萬</span></div><span class="arrow">↗</span></a>
+    <a class="vid" href="https://www.instagram.com/reel/DKjd7ZSz9He/" target="_blank"><div class="t">彰化大村的別墅都要這麼豪嗎？</div><div class="d">非熱區也能破 60 萬——關鍵是「都要這麼豪嗎」這個預期違背。</div><div class="m"><span class="badge plat">Instagram Reel</span><span class="badge loc">彰化大村</span><span class="badge hi">實查 67.4 萬</span></div><span class="arrow">↗</span></a>
+    <a class="vid" href="https://www.instagram.com/reel/DTxA_GyAHui/" target="_blank"><div class="t">獨門獨院＋大地坪私人車庫的總裁級別墅，彰化花壇</div><div class="d">2026 年 1 月的片。裝潢近 800 萬——數字放在文案第一句。</div><div class="m"><span class="badge plat">Instagram Reel</span><span class="badge loc">彰化花壇</span><span class="badge hi">實查 21.3 萬</span></div><span class="arrow">↗</span></a>
+    <a class="vid" href="https://www.instagram.com/reel/DclH_uVqqyg/" target="_blank"><div class="t">南屯老街平房 888 萬，兩房兩衛</div><div class="d">「賣房子的阿姨」，玩美趨勢學員，單月成交 11 間。標題只有總價＋區域＋格局，畫面直接開門。</div><div class="m"><span class="badge plat">Instagram Reel</span><span class="badge loc">台中南屯</span><span class="badge hi">實查 18 萬</span></div><span class="arrow">↗</span></a>
+  </div>
+  <div class="callout g">🔧 你的版本：<b>標題 ＝ 總價 ＋ 區域 ＋ 一個反差。</b>「楠梓 1XXX 萬，買三房還送平面車位」——你手上五個案，每個都能填。</div>
+
+  <h3>風格 C・先講缺點／知識避坑（信任值最高） <span class="tag good">P11 避坑警告</span></h3>
+  <div class="why">高雄左營的房仲鄭家虹「家虹房產日記」，4.6 萬粉。她講的不是物件，是<b>你也天天會遇到、但沒人講清楚的事</b>——講完之後，觀眾才會相信你講的優點。</div>
+  <div class="grid">
+    <a class="vid" href="https://www.instagram.com/reel/DE9t29Rhq-P/" target="_blank"><div class="t">印鑑證明的重要性——你知道代書是不是執業中，是可以查的嗎？</div><div class="d">帳號最高的一支。一個「你可以查」的動作型建議。</div><div class="m"><span class="badge plat">Instagram Reel</span><span class="badge loc">高雄左營</span><span class="badge hi">實查 137.4 萬</span></div><span class="arrow">↗</span></a>
+    <a class="vid" href="https://www.instagram.com/reel/Dbx6JpWpVuG/" target="_blank"><div class="t">你們會買大樓 2、3 樓的房子嗎？</div><div class="d">一個買方每天在想、業務不敢主動講的問題。</div><div class="m"><span class="badge plat">Instagram Reel</span><span class="badge loc">高雄左營</span><span class="badge hi">實查 110.3 萬</span></div><span class="arrow">↗</span></a>
+    <a class="vid" href="https://www.instagram.com/reel/DAU7hnDBwWR/" target="_blank"><div class="t">房子要留給小孩，你需要注意什麼？</div><div class="d">6,176 讚。留言區整排「房屋大補帖」——留言關鍵字換資料，這就是導私訊的機關。</div><div class="m"><span class="badge plat">Instagram Reel</span><span class="badge loc">高雄左營</span><span class="badge hi">實查 67.9 萬</span></div><span class="arrow">↗</span></a>
+    <a class="vid" href="https://www.instagram.com/reel/DcOMWGTJqY2/" target="_blank"><div class="t">授權書真的不要亂簽</div><div class="d">「這件事我一定要提醒你們，請認真看完」——先講風險的人，才有資格講機會。</div><div class="m"><span class="badge plat">Instagram Reel</span><span class="badge loc">高雄左營</span><span class="badge hi">實查 10.8 萬</span></div><span class="arrow">↗</span></a>
+    <a class="vid" href="https://www.youtube.com/watch?v=XUzuiPhlxY8" target="_blank"><div class="t">高雄房地產界的祝福｜驗屋十四招全教了（新成屋・撥款前必看）</div><div class="d">29 分鐘的長片有 24 萬人看完，證明高雄人多想知道驗屋。<b style="color:#fff">30 秒的版本還沒有人做。</b></div><div class="m"><span class="badge plat">YouTube 29:17</span><span class="badge loc">高雄</span><span class="badge hi">實查 243,940 次</span></div><span class="arrow">↗</span></a>
+  </div>
+  <div class="callout g">🔧 你的版本：<b>「這三種客人，我不建議買預售屋」「看預售屋我一定會蹲下來看的 3 個地方」</b>——你不講，別人會用更難聽的方式講。</div>
+
+  <h3>風格 D・業務人設・日常 <span class="tag good">P11 業務的一天</span></h3>
+  <div class="why">同一個家虹。觀眾先買人、再買房——<b>跟物件無關的片，反而讓人記住你是誰。</b></div>
+  <div class="grid">
+    <a class="vid" href="https://www.instagram.com/reel/DRzKQd-CQNH/" target="_blank"><div class="t">最新的網路用語，靠我要瘋了</div><div class="d">帶看時跟年輕客人的代溝。沒有房子、沒有價格——120 萬人看完。</div><div class="m"><span class="badge plat">Instagram Reel</span><span class="badge loc">高雄左營</span><span class="badge hi">實查 120.8 萬</span></div><span class="arrow">↗</span></a>
+    <a class="vid" href="https://www.instagram.com/reel/DcD79ZTpy8L/" target="_blank"><div class="t">歡迎來到我新買的房子——我會買的房子到底是什麼標準</div><div class="d">「這間我自己會不會買」的終極版：拍自己買的那間。</div><div class="m"><span class="badge plat">Instagram Reel</span><span class="badge loc">高雄左營</span><span class="badge hi">實查 15.9 萬</span></div><span class="arrow">↗</span></a>
+  </div>
+  <div class="callout g">💬 四種風格的共同點：<b>有人講、講出觀點、標題有數字。</b>上面那一區，三樣都沒有。</div>
+</section>
+
+<!-- ============ 開拍剪輯案例 ============ -->
+<section id="kaipai">
+  <div class="sec-head"><span class="kick">Part 3 — Step 4 剪輯</span><h2>🎬 開拍剪輯案例：同一支素材，剪前 vs 剪後</h2></div>
+  <div class="sec-note">簡報 Step 4 講的「素材丟上去 → 自動出片」長這樣。同一支 16 秒的手機直出素材，右邊是丟進<b>開拍 App</b>之後的成品：自動上字幕、加標題字卡、套版。<b>點播放鍵直接看。</b></div>
+  <div class="ba">
+    <div class="clip">
+      <div class="lab">BEFORE</div>
+      <h4>手機直出（未剪輯）</h4>
+      <video controls playsinline preload="metadata" src="video/kaipai_before.mp4"></video>
+      <div class="note">iPhone 拍完直接存檔。沒有字幕、沒有標題，講什麼要靠聽。</div>
+    </div>
+    <div class="clip after">
+      <div class="lab">AFTER ・ 開拍 APP</div>
+      <h4>開拍自動剪（字幕＋標題字卡）</h4>
+      <video controls playsinline preload="metadata" src="video/kaipai_after.mp4"></video>
+      <div class="note">同一支素材丟進去，自動辨識語音上字幕、加標題。你要做的只有：選模板、丟素材、抓錯字。</div>
+    </div>
+  </div>
+  <div class="callout g">🔧 你回去可以這樣做：<b>把你手上任何一支接待中心拍的素材丟進開拍，10 分鐘內拿到有字幕的版本。</b>先求有，再求好——先發第一支。</div>
+</section>
+
+<!-- ============ 學員實證 ============ -->
+<section id="proof">
+  <div class="sec-head"><span class="kick">Part 4 — Proof it works</span><h2>🏆 玩美趨勢・房仲學員實證</h2></div>
+  <div class="sec-note">這一區的數字是<b>成交數與名單數</b>，不是觀看數——因為你最後要的是這個。有影片的直接連到影片。</div>
+  <div class="grid">
+    <a class="vid" href="https://www.instagram.com/reel/C_ke7H4yFxU/" target="_blank"><div class="t">那對房仲夫妻 Andy & 文凌</div><div class="d">從 2 粉開始日更。一個月後 <b style="color:#fff">20 組客戶主動加 LINE</b>；3 個月成為百萬經紀人，一天簽 2 個專任委託。</div><div class="m"><span class="badge plat">→ 264 萬那支</span><span class="badge views">2 粉 → 1.4 萬粉</span></div><span class="arrow">↗</span></a>
+    <a class="vid" href="https://www.instagram.com/reel/DclH_uVqqyg/" target="_blank"><div class="t">賣房子的阿姨</div><div class="d">資歷 4–5 年、沒有舊客源。改做開箱好宅日更後，<b style="color:#fff">單月成交 11 間</b>，屋主主動找她簽委託。</div><div class="m"><span class="badge plat">→ 888 萬那支</span><span class="badge views">單月成交 11 間</span></div><span class="arrow">↗</span></a>
+    <div class="vid"><div class="t">房仲古神（花蓮）</div><div class="d">非六都、非熱區。<b style="color:#fff">6 個月達成千萬經紀人</b>，單支 18.2 萬，留言牆整排「價格？」「多少？」。</div><div class="m"><span class="badge views">6 個月千萬經紀人</span></div></div>
+    <div class="vid"><div class="t">小巢虹閔</div><div class="d">46 歲入行的新手，第一年就<b style="color:#fff">成交 8 件</b>。年紀不是問題，沒有舊客源才是。</div><div class="m"><span class="badge views">首年成交 8 件</span></div></div>
+    <div class="vid"><div class="t">房東的房仲・育雯</div><div class="d">賣過 700 間房的千萬經紀人，天花板卡住。加上短影音後<b style="color:#fff">一泡百萬</b>。</div><div class="m"><span class="badge views">一泡百萬</span></div></div>
+    <div class="vid"><div class="t">台中居里夫人</div><div class="d">只發了 <b style="color:#fff">10 支影片，引流 400+ 位潛在客戶加 LINE</b>。不是量堆出來的，是選題對了。</div><div class="m"><span class="badge views">10 支 → 400+ LINE</span></div></div>
+  </div>
+  <div class="callout">💬 六個人的共同點：<b>沒有一個是靠「拍得漂亮」贏的。</b>他們贏在選題打中焦慮、講話有情緒、CTA 導私訊——也就是這堂課從頭到尾在講的三件事。</div>
+</section>
+
+<!-- ============ 延伸閱讀 ============ -->
+<section id="read">
+  <div class="sec-head"><span class="kick">Part 5 — Further reading</span><h2>📄 延伸閱讀</h2></div>
+  <div class="grid">
+    <a class="vid" href="https://house.ettoday.net/news/2998561" target="_blank"><div class="t">ETtoday：30 秒一鏡到底拍 2 小時，爆紅房仲跑男自曝是 I 人</div><div class="d">跑男怎麼拍的：清晨 6 點場勘、跑 7–8 次才成、一支 30 秒拍 1–2 小時。</div><div class="m"><span class="badge plat">報導</span></div><span class="arrow">↗</span></a>
+    <a class="vid" href="https://house.udn.com/house/story/123592/9169087" target="_blank"><div class="t">udn：房產短影音怎麼拍才有效？流量不是重點——土地婆麗娜</div><div class="d">「流量與有效名單未必成正比」。你要盯的是單筆名單成本，不是觀看數。</div><div class="m"><span class="badge plat">報導</span></div><span class="arrow">↗</span></a>
+    <a class="vid" href="https://www.ls-realty.com.tw/products/index.php" target="_blank"><div class="t">聯盛地產・精選房屋</div><div class="d">當堂作業要用：從新成屋／預售屋／透天裡挑一個你的主推案。</div><div class="m"><span class="badge plat">官網</span></div><span class="arrow">↗</span></a>
+  </div>
+</section>
+
+<div class="divider"></div>
+<footer>PERFECT TREND ・ 短影音帶客 AI 工作流程 ・ 聯盛地產專場 ・ 實查日期 2026-09</footer>
+</div>
+</body>
+</html>

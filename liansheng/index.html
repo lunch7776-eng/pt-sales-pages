@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>短影音帶客 AI 工作流程｜聯盛地產 專場</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Oswald:wght@500;600;700&display=swap');
+
+:root{
+  --bg:#08080a;
+  --ink:#ffffff;
+  --muted:#9a9aa2;
+  --dim:#6a6a72;
+  --red:#E4002B;
+  --red-deep:#a80020;
+  --red-soft:#ff3355;
+  --card:#141417;
+  --card2:#1b1b20;
+  --line:#2a2a31;
+  --green:#3ddc84;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#000;overflow:hidden}
+body{font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;color:var(--ink)}
+
+/* ---- scaling stage ---- */
+#viewport{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#000}
+#deck{position:relative;width:1280px;height:720px;transform-origin:center center}
+
+.slide{
+  position:absolute;inset:0;
+  background:var(--bg);
+  padding:64px 76px;
+  display:none;
+  overflow:hidden;
+}
+.slide.active{display:block}
+
+/* photographic slides */
+.slide.photo{background-size:cover;background-position:center}
+.slide.photo::before{content:"";position:absolute;inset:0;
+  background:linear-gradient(90deg, rgba(6,6,8,.94) 0%, rgba(6,6,8,.82) 42%, rgba(6,6,8,.35) 78%, rgba(6,6,8,.15) 100%);}
+.slide.photo.rev::before{background:linear-gradient(90deg, rgba(6,6,8,.94) 0%, rgba(6,6,8,.82) 42%, rgba(6,6,8,.35) 78%, rgba(6,6,8,.15) 100%);}
+.slide.photo.dim::before{background:linear-gradient(90deg, rgba(6,6,8,.97) 0%, rgba(6,6,8,.93) 48%, rgba(6,6,8,.72) 74%, rgba(6,6,8,.5) 100%), linear-gradient(180deg, rgba(6,6,8,.25), rgba(6,6,8,.45));}
+.slide.photo.center::before{background:linear-gradient(90deg, rgba(6,6,8,.94) 0%, rgba(6,6,8,.8) 40%, rgba(6,6,8,.4) 75%, rgba(6,6,8,.2) 100%), linear-gradient(180deg, rgba(6,6,8,.2), rgba(6,6,8,.55));}
+.slide > *{position:relative;z-index:2}
+
+/* grain + vignette on all */
+.slide::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+  box-shadow:inset 0 0 220px rgba(0,0,0,.6);
+  background-image:radial-gradient(rgba(255,255,255,.018) 1px, transparent 1px);
+  background-size:3px 3px;}
+
+/* ---- brand lockup ---- */
+.logo{position:absolute;top:44px;left:76px;display:flex;align-items:center;gap:11px;z-index:5}
+.logo .mark{width:34px;height:34px;background:var(--red);border-radius:7px;display:flex;align-items:center;justify-content:center;
+  font-family:Oswald;font-weight:700;font-size:22px;color:#fff;line-height:1}
+.logo .txt{line-height:1.1}
+.logo .txt b{font-family:Oswald;font-weight:700;letter-spacing:2px;font-size:15px;display:block}
+.logo .txt span{font-size:10px;color:var(--muted);letter-spacing:5px}
+
+.directed{position:absolute;bottom:40px;right:76px;text-align:right;z-index:5}
+.directed small{font-family:Oswald;letter-spacing:3px;color:var(--muted);font-size:11px;display:block;margin-bottom:3px}
+.directed b{font-size:19px;font-weight:900}
+.directed b i{font-style:normal;font-family:Oswald;font-weight:500;color:var(--muted);font-size:13px;margin-left:8px;letter-spacing:1px}
+
+.pagenum{position:absolute;bottom:44px;left:76px;font-family:Oswald;color:var(--dim);font-size:13px;letter-spacing:2px;z-index:5}
+
+/* ---- type ---- */
+.kicker{font-family:Oswald;font-weight:600;letter-spacing:4px;font-size:15px;color:var(--red);text-transform:uppercase;margin-bottom:14px}
+.bar{width:52px;height:4px;background:var(--red);border-radius:2px;margin:18px 0 22px}
+h1.big{font-weight:900;font-size:74px;line-height:1.06;letter-spacing:-1px}
+h1.big .r{color:var(--red)}
+h2.mid{font-weight:900;font-size:52px;line-height:1.12;letter-spacing:-.5px}
+.sub{font-size:20px;color:#d5d5db;line-height:1.6;font-weight:400;margin-top:18px;max-width:640px}
+.sub .r{color:var(--red-soft);font-weight:700}
+.eng{font-family:Oswald;font-weight:500;letter-spacing:2px;color:var(--muted);font-size:17px;margin-top:6px}
+.quote{color:#c9c9d0;font-style:italic;font-size:19px;line-height:1.6}
+.quote .q{color:var(--red);font-size:34px;font-family:Georgia;vertical-align:-8px;margin-right:4px}
+
+/* ---- stat row ---- */
+.stats{display:flex;gap:40px;margin-top:44px}
+.stats .s b{font-family:Oswald;font-weight:700;font-size:44px;color:#fff;display:block;line-height:1}
+.stats .s.rr b{color:var(--red)}
+.stats .s span{font-size:13px;color:var(--muted);letter-spacing:1px;margin-top:6px;display:block}
+
+/* ---- cta ---- */
+.cta{display:inline-flex;align-items:center;gap:10px;background:var(--red);color:#fff;font-weight:700;
+  font-size:17px;padding:15px 30px;border-radius:9px;margin-top:34px;box-shadow:0 8px 30px rgba(228,0,43,.35)}
+.cta.ghost{background:rgba(255,255,255,.06);border:1px solid var(--line);box-shadow:none}
+
+/* ---- 3 cards ---- */
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:38px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:26px 24px}
+.card.hot{border-color:var(--red)}
+.card .n{width:30px;height:30px;background:var(--red);border-radius:50%;color:#fff;font-weight:700;
+  display:flex;align-items:center;justify-content:center;font-size:15px;margin-bottom:16px}
+.card h3{font-size:22px;font-weight:900;margin-bottom:10px}
+.card p{color:var(--muted);font-size:15px;line-height:1.6}
+.card .tag{display:inline-block;font-family:Oswald;font-size:12px;letter-spacing:2px;color:var(--red);margin-bottom:10px}
+
+/* three-col info (WHO/WHAT/WHY) */
+.trio{display:grid;grid-template-columns:repeat(3,1fr);gap:34px;margin-top:40px}
+.trio .col .lab{font-family:Oswald;color:var(--red);letter-spacing:3px;font-size:14px;margin-bottom:8px}
+.trio .col h3{font-size:26px;font-weight:900;margin-bottom:16px}
+.trio .col li{list-style:none;color:#cfcfd6;font-size:16px;line-height:1.5;padding-left:18px;position:relative;margin-bottom:9px}
+.trio .col li::before{content:"";position:absolute;left:0;top:9px;width:6px;height:6px;background:var(--red);border-radius:50%}
+
+/* levels 3 */
+.levels{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:36px}
+.lv{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px 22px;position:relative}
+.lv.on{border-color:var(--red);background:#1a1214}
+.lv .badge{position:absolute;top:-11px;right:16px;background:var(--red);font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px}
+.lv .num{width:26px;height:26px;background:var(--red);border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;margin-bottom:12px}
+.lv h3{font-size:21px;font-weight:900;margin-bottom:10px}
+.lv p{color:var(--muted);font-size:14px;line-height:1.55;min-height:66px}
+.lv .foot{border-top:1px solid var(--line);margin-top:14px;padding-top:12px;font-family:Oswald;color:var(--red-soft);font-size:15px;letter-spacing:1px}
+
+/* algorithm list */
+.alist{margin-top:30px}
+.alist .row{display:flex;align-items:center;gap:26px;padding:18px 0;border-bottom:1px solid var(--line)}
+.alist .row .k{font-family:Oswald;font-weight:700;font-size:40px;color:var(--red);width:56px}
+.alist .row h3{font-size:26px;font-weight:900}
+.alist .row p{color:var(--muted);font-size:15px;margin-top:3px}
+
+/* steps 6 timeline */
+.flow{display:flex;justify-content:space-between;margin-top:56px;gap:6px}
+.flow .st{flex:1;text-align:left;position:relative}
+.flow .st .no{font-family:Oswald;font-weight:700;font-size:30px;color:var(--red)}
+.flow .st .no::after{content:"→";color:var(--dim);margin-left:14px;font-size:22px}
+.flow .st:last-child .no::after{content:""}
+.flow .st h4{font-size:20px;font-weight:900;margin:10px 0 5px}
+.flow .st span{font-family:Oswald;color:var(--muted);font-size:12px;letter-spacing:1px}
+
+/* step page prompt box */
+.stepwrap{display:flex;gap:40px;align-items:flex-start;margin-top:26px}
+.stepbadge{position:absolute;top:120px;left:76px}
+.stepbadge .sq{display:inline-flex;align-items:center;gap:10px}
+.stepbadge .sq b{width:30px;height:30px;background:var(--red);border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px}
+.stepbadge .sq span{font-family:Oswald;letter-spacing:4px;color:var(--muted);font-size:14px}
+.prompt{background:rgba(20,20,23,.82);border:1px solid var(--line);border-left:3px solid var(--red);border-radius:12px;padding:24px 26px;max-width:600px;backdrop-filter:blur(3px)}
+.prompt .lab{font-family:Oswald;color:var(--red);letter-spacing:2px;font-size:13px;margin-bottom:12px}
+.prompt p{color:#e2e2e8;font-size:16px;line-height:1.7}
+.prompt .v{color:var(--red-soft)}
+.prompt ol{margin:10px 0 0 20px;color:#cfcfd6;font-size:15px;line-height:1.9}
+
+.pill{display:inline-block;font-size:12px;font-weight:700;padding:4px 11px;border-radius:6px;margin-left:8px}
+.pill.free{background:rgba(61,220,132,.14);color:var(--green)}
+.pill.paid{background:rgba(228,0,43,.16);color:var(--red-soft)}
+
+.opts{margin-top:26px;max-width:720px}
+.opt{display:flex;align-items:center;gap:18px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin-bottom:14px}
+.opt .L{width:34px;height:34px;background:var(--red);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;flex:none}
+.opt h4{font-size:19px;font-weight:900}
+.opt p{color:var(--muted);font-size:14px;margin-top:2px}
+
+/* generic table */
+table.tbl{width:100%;border-collapse:collapse;margin-top:26px;font-size:15.5px}
+table.tbl th{background:var(--red);color:#fff;text-align:left;padding:13px 16px;font-weight:700;font-size:14px;letter-spacing:1px}
+table.tbl td{padding:13px 16px;border-bottom:1px solid var(--line);color:#d7d7dd;vertical-align:top}
+table.tbl tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+table.tbl td b{color:#fff}
+table.tbl .r{color:var(--red-soft);font-weight:700}
+table.tbl .g{color:var(--green);font-weight:700}
+
+/* formula */
+.formula{margin-top:30px;background:linear-gradient(90deg,#1a0e11,#120c0e);border:1px solid var(--red-deep);border-radius:14px;padding:30px 34px;text-align:center}
+.formula b{font-size:34px;font-weight:900;line-height:1.4}
+.formula b .r{color:var(--red)}
+
+/* audience / type columns */
+.acol{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:30px}
+.acol .c{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px}
+.acol .c .hd{font-size:20px;font-weight:900;margin-bottom:6px}
+.acol .c .hd small{display:block;font-size:12px;color:var(--muted);font-weight:400;letter-spacing:1px;margin-top:4px;font-family:Oswald}
+.acol .c .fear{color:var(--red-soft);font-size:14px;margin:12px 0;line-height:1.5}
+.acol .c .give{color:#cfcfd6;font-size:15px;line-height:1.6}
+.acol .c ul{margin-top:10px;padding-left:16px}
+.acol .c li{color:#cfcfd6;font-size:14px;line-height:1.7}
+.acol .c li::marker{color:var(--red)}
+
+.foot-line{position:absolute;bottom:44px;left:0;right:0;text-align:center;color:#e6e6ec;font-size:19px;font-weight:700;z-index:4}
+.foot-line .r{color:var(--red)}
+
+.mini{font-size:14px;color:var(--dim);margin-top:12px}
+.tip{margin-top:22px;color:var(--muted);font-size:15px}
+.tip b{color:var(--red-soft)}
+
+/* redline list */
+.rl{display:grid;grid-template-columns:1fr 1fr;gap:12px 22px;margin-top:24px}
+.rl .i{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-left:3px solid var(--red);border-radius:10px;padding:13px 16px}
+.rl .i b.no{font-family:Oswald;color:var(--red);font-size:19px;line-height:1.2;flex:none}
+.rl .i h4{font-size:16px;font-weight:900;margin-bottom:3px}
+.rl .i p{color:var(--muted);font-size:13.5px;line-height:1.5}
+
+/* nav */
+#nav{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:30}
+#nav .dot{width:8px;height:8px;border-radius:50%;background:#3a3a42;cursor:pointer;transition:.2s}
+#nav .dot.on{background:var(--red);width:22px;border-radius:5px}
+#hint{position:fixed;bottom:18px;right:20px;color:#4a4a52;font-size:12px;z-index:30;font-family:Oswald;letter-spacing:1px}
+#counter{position:fixed;top:18px;right:22px;color:#5a5a62;font-family:Oswald;font-size:13px;letter-spacing:2px;z-index:30}
+
+@media print{
+  @page{size:1280px 720px;margin:0}
+  html,body{overflow:visible;height:auto;background:#08080a}
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  #viewport{position:static;display:block}
+  #deck{width:1280px;height:auto;transform:none!important}
+  .slide{display:block!important;position:relative;page-break-after:always;break-after:page;width:1280px;height:720px;overflow:hidden}
+  .slide:last-child{page-break-after:auto;break-after:auto}
+  #nav,#hint,#counter{display:none}
+}
+</style>
+</head>
+<body>
+<div id="viewport"><div id="deck">
+
+<!-- ============ P1 封面 ============ -->
+<section class="slide photo active" style="background-image:url(img/re_hero.png)">
+  <div class="logo"><div class="mark">P</div><div class="txt"><b>PERFECT TREND</b><span>原創課程</span></div></div>
+  <div style="margin-top:56px">
+    <div class="kicker">AI PROPERTY SERIES ｜ 聯盛地產 專場</div>
+    <h1 class="big">短影音<span class="r">帶客</span><br>AI 工作流程</h1>
+    <div class="bar"></div>
+    <p class="sub">手機操作・90% 免費工具・不用發廣告預算，業務自己就能做</p>
+    <div class="stats">
+      <div class="s rr"><b>5</b><span>案皆適用</span></div>
+      <div class="s"><b>6</b><span>步驟流程</span></div>
+      <div class="s rr"><b>90%</b><span>免費工具</span></div>
+      <div class="s"><b>1</b><span>天上手</span></div>
+    </div>
+    <div style="margin-top:30px" class="quote"><span class="q">“</span>你不需要很厲害才開始，但你要開始才會很厲害。<span style="color:var(--muted);font-style:normal">— 雨群</span></div>
+  </div>
+  <div class="directed"><small>DIRECTED BY</small><b>雨群<i>YU CHUN</i></b></div>
+</section>
+
+<!-- ============ P2 講師 ============ -->
+<section class="slide">
+  <img src="img/yuchun_portrait.jpg" alt="" style="position:absolute;right:0;top:0;height:100%;width:36%;object-fit:cover;object-position:center top;z-index:1">
+  <div style="position:absolute;right:0;top:0;height:100%;width:44%;z-index:1;background:linear-gradient(90deg,#08080a 0%,rgba(8,8,10,.55) 34%,rgba(8,8,10,0) 72%)"></div>
+  <div style="position:absolute;right:36%;top:0;height:100%;width:4px;background:var(--red);z-index:2"></div>
+  <div class="logo"><div class="mark">P</div><div class="txt"><b>PERFECT TREND</b><span>原創課程</span></div></div>
+  <div class="kicker" style="margin-top:44px">THE INSTRUCTOR</div>
+  <h1 class="big" style="font-size:64px">講師介紹</h1>
+  <div class="eng">MEET YU CHUN</div>
+  <div class="bar"></div>
+  <div style="max-width:56%">
+    <div style="font-size:40px;font-weight:900;margin-bottom:18px">雨群 <span style="font-family:Oswald;font-weight:500;color:var(--muted);font-size:22px">Yu Chun</span></div>
+    <table style="font-size:15px;color:#d5d5db;line-height:2.1">
+      <tr><td style="color:var(--red);font-weight:700;padding-right:18px">TikTok 180 萬追蹤</td><td style="color:var(--muted)">全亞洲頂尖短影音創作者</td></tr>
+      <tr><td style="color:var(--red);font-weight:700">有玩娛樂・共同創辦人</td><td style="color:var(--muted)">短影音內容製作公司</td></tr>
+      <tr><td style="color:var(--red);font-weight:700">玩美趨勢・共同創辦人</td><td style="color:var(--muted)">三年協助客戶總變現 5 億</td></tr>
+      <tr><td style="color:var(--red);font-weight:700">金刻獎・短影幫・LINE 加速金</td><td style="color:var(--muted)">華語區指標獎項與官方認證創作者</td></tr>
+    </table>
+    <div class="quote" style="margin-top:24px;max-width:520px"><span class="q">“</span>我三年幫客戶做出 <b style="color:var(--red-soft);font-style:normal">5 億轉單</b>。帶看的本質跟轉單一樣——先讓人信任你，再讓人主動私訊你。</div>
+  </div>
+</section>
+
+<!-- ============ P3 課程介紹 ============ -->
+<section class="slide">
+  <div class="logo"><div class="mark">P</div><div class="txt"><b>PERFECT TREND</b><span>原創課程</span></div></div>
+  <div class="kicker" style="margin-top:40px">THE COURSE</div>
+  <h1 class="big" style="font-size:60px">一日 AI 短影音帶客課</h1>
+  <div class="eng">ONE-DAY AI SHORT-FORM PROPERTY WORKSHOP</div>
+  <div class="bar"></div>
+  <div class="trio">
+    <div class="col"><div class="lab">WHO 適合誰</div><h3>案場銷售團隊</h3>
+      <ul><li>接待中心銷售人員</li><li>案場企劃／行銷</li><li>想自己開發客源的業務</li></ul></div>
+    <div class="col"><div class="lab">WHAT 你會學到</div><h3>6 步驟工作流</h3>
+      <ul><li>建案內容怎麼選題</li><li>AI 寫稿 / 配音 / 剪輯</li><li>讓客戶主動私訊的做法</li></ul></div>
+    <div class="col"><div class="lab">WHY 為什麼這堂</div><h3>90% 工具免費</h3>
+      <ul><li>手機就能完成</li><li>一個案一週穩定產出</li><li>下課即能發布作品</li></ul></div>
+  </div>
+  <div class="stats" style="margin-top:40px">
+    <div class="s rr"><b>5</b><span>案皆適用</span></div>
+    <div class="s"><b>6</b><span>步驟</span></div>
+    <div class="s rr"><b>90%</b><span>免費工具</span></div>
+    <div class="s"><b>1</b><span>天上手</span></div>
+  </div>
+</section>
+
+<!-- ============ P4 問題 ============ -->
+<section class="slide photo" style="background-image:url(img/re_pain.png)">
+  <div class="logo"><div class="mark">P</div><div class="txt"><b>PERFECT TREND</b><span>原創課程</span></div></div>
+  <div class="kicker" style="margin-top:52px">THE PROBLEM</div>
+  <h2 class="mid">為什麼多數房產的<br>短影音，沒人看？</h2>
+  <div class="bar"></div>
+  <div style="max-width:585px">
+    <p class="sub" style="margin-top:10px"><span class="r">死因一・拍成建案廣告片</span><br>空拍＋3D 動畫＋跑馬燈價格，觀眾一眼認出是廣告，0.8 秒滑掉。</p>
+    <p class="sub" style="margin-top:16px"><span class="r">死因二・沒有情緒</span><br>觀眾挑的是<b style="color:#fff">影片的情緒</b>，不是物件。情緒可以由人給，也可以由 OS 口白帶——<b style="color:#fff">空鏡＋規格表，等於沒有影片。</b></p>
+  </div>
+  <div class="stats" style="margin-top:32px">
+    <div class="s"><b>90%</b><span>做兩支就停</span></div>
+    <div class="s"><b>9%</b><span>找外包代操</span></div>
+    <div class="s rr"><b>1%</b><span>用 AI 自己做</span></div>
+  </div>
+  <div class="foot-line">不是短影音沒用，是<span class="r">方法錯了</span>。</div>
+</section>
+
+<!-- ============ P5 三層次 ============ -->
+<section class="slide">
+  <div class="logo"><div class="mark">P</div><div class="txt"><b>PERFECT TREND</b><span>原創課程</span></div></div>
+  <div class="kicker" style="margin-top:40px">AI LEVELS</div>
+  <h2 class="mid">AI 應用的三個層次</h2>
+  <div class="bar"></div>
+  <p class="sub" style="margin-top:0">你沒有行銷團隊，<span class="r">AI 就是你的一人案場小編</span>。</p>
+  <div class="levels">
+    <div class="lv"><div class="num">1</div><h3>應用</h3><p>直接使用 ChatGPT、Claude、剪映等現成 AI 工具。</p><div class="foot">省 90% 時間</div></div>
+    <div class="lv on"><div class="badge">本課程</div><div class="num">2</div><h3>工作流程</h3><p>把多個工具串起來，形成一套可重複的帶客內容產出流程。</p><div class="foot">省 95%+ 時間</div></div>
+    <div class="lv"><div class="num">3</div><h3>開發模型</h3><p>訓練專屬模型、寫 Agent、接 API，打造高度客製系統。</p><div class="foot">高度客製</div></div>
+  </div>
+</section>
+
+<!-- ============ P6 演算法 ============ -->
+<section class="slide photo rev" style="background-image:url(img/s06_algo.png)">
+  <div class="logo"><div class="mark">P</div><div class="txt"><b>PERFECT TREND</b><span>原創課程</span></div></div>
+  <div class="kicker" style="margin-top:48px">ALGORITHM</div>
+  <h2 class="mid">演算法只看三件事</h2>
+  <div class="bar"></div>
+  <div class="alist" style="max-width:600px">
+    <div class="row"><div class="k">1</div><div><h3>完播率</h3><p>有沒有人看完？最關鍵的指標</p></div></div>
+    <div class="row"><div class="k">2</div><div><h3>互動率</h3><p>按讚、留言、分享、儲存</p></div></div>
+    <div class="row"><div class="k">3</div><div><h3>停留時間</h3><p>觀眾在影片上停了多久</p></div></div>
+  </div>
+  <p class="tip" style="max-width:600px"><b>帶客解讀：</b>有人看完一支「30 秒走完 3 房」→ 平台就把你推給更多正在高雄看房的人。</p>
+</section>
+
+<!-- ============ P7 核心 Reframe ============ -->
+<section class="slide photo center" style="background-image:url(img/re_trust.png)">
+  <div class="logo"><div class="mark">P</div><div class="txt"><b>PERFECT TREND</b><span>原創課程</span></div></div>
+  <div class="kicker" style="margin-top:24px">CONTENT STRATEGY</div>
+  <h2 class="mid" style="font-size:44px">短影音帶客，不是用來喊<span style="color:var(--red)">「現在買最便宜」</span>的</h2>
+  <p class="sub" style="margin-top:8px">短影音只有三個目的 — 成交是接待中心和 LINE 的事</p>
+  <div class="cards" style="margin-top:26px">
+    <div class="card"><div class="n">1</div><h3>建立信任</h3><p>讓客戶覺得「這個業務有料、不唬人」</p></div>
+    <div class="card"><div class="n">2</div><h3>留下線索</h3><p>讓人想私訊要格局圖、要總價帶</p></div>
+    <div class="card"><div class="n">3</div><h3>產生好奇</h3><p>讓人主動預約賞屋、走進接待中心</p></div>
+  </div>
+  <div class="foot-line">先吸引 <span class="r">→</span> 再信任 <span class="r">→</span> 最後才帶看</div>
+</section>
+
+<!-- ============ P8 三種受眾 ============ -->
+<section class="slide">
+  <div class="logo"><div class="mark">P</div><div class="txt"><b>PERFECT TREND</b><span>原創課程</span></div></div>
+  <div class="kicker" style="margin-top:40px">YOUR AUDIENCE</div>
+  <h2 class="mid">你不是拍給「想買房的人」看<br>是拍給「三個決策者」看</h2>
+  <div class="bar"></div>
+  <div class="acol">
+    <div class="c"><div class="hd">首購夫妻<small>25–35・預算天花板明確</small></div><div class="fear">怕買貴、怕踩雷、怕貸不下來</div><div class="give">給他 <b style="color:#fff">安心</b> — 流程講清楚、缺點先說</div></div>
+    <div class="c"><div class="hd">出錢的長輩<small>頭期款決策者</small></div><div class="fear">怕小孩被業務牽著走</div><div class="give">給他 <b style="color:#fff">專業感</b> — 建商、結構、生活圈講得出來</div></div>
+    <div class="c"><div class="hd">換屋・置產族<small>35–50・已經有房</small></div><div class="fear">怕買錯區段、怕套在高點</div><div class="give">給他 <b style="color:#fff">判斷力</b> — 區域比較、成交行情</div></div>
+  </div>
+  <div class="foot-line">好的房產片，太太會忍不住<span class="r">轉傳給先生</span>。</div>
+</section>
+
+<!-- ============ P9 選題公式 ============ -->
+<section class="slide photo rev" style="background-image:url(img/re_topic.png)">
+  <div class="logo"><div class="mark">P</div><div class="txt"><b>PERFECT TREND</b><span>原創課程</span></div></div>
+  <div class="kicker" style="margin-top:44px">TOPIC FORMULA</div>
+  <h2 class="mid">帶客選題公式</h2>
+  <div class="formula" style="max-width:860px"><b>購屋族的焦慮/好奇 <span class="r">×</span> 你手上案子的真實日常 <span class="r">=</span> 拍不完的選題</b></div>
+  <p class="tip" style="max-width:760px"><b>客戶不追時事梗，他們追「我這筆錢會不會買錯」。</b></p>
+  <div class="cards" style="margin-top:18px">
+    <div class="card hot"><div class="tag">A</div><h3>列疑問</h3><p>列出 10 個「客戶對這個案／這個區的迷思與疑問」</p></div>
+    <div class="card hot"><div class="tag">B</div><h3>丟 Claude</h3><p>每個疑問生 3 個短影音標題</p></div>
+    <div class="card hot"><div class="tag">C</div><h3>一次 30 題</h3><p>一個案一次產 30 個選題，整季拍不完</p></div>
+  </div>
+</section>
+
+<!-- ============ P10 你的武器 ============ -->
+<section class="slide photo" style="background-image:url(img/re_walk.png)">
+  <div class="logo"><div class="mark">P</div><div class="txt"><b>PERFECT TREND</b><span>原創課程</span></div></div>
+  <div class="kicker" style="margin-top:56px">YOUR ADVANTAGE</div>
+  <h2 class="mid">別人只能看照片<br>你能<span style="color:var(--red)">走進去</span></h2>
+  <div class="bar"></div>
+  <p class="sub"><span class="r">「現場」＝ 天生好看的短影音</span><br>空屋走拍、樣品屋中島、頂樓景觀、工地結構、車道實測、清晨採光。</p>
+  <div class="prompt" style="max-width:640px;margin-top:26px">
+    <p><b style="color:var(--red)">對業務特別喊話：</b><br>你以為自己不上鏡——但推開門的那一下、走到落地窗前的那一秒，<span class="v">是演算法天菜。</span></p>
+  </div>
+</section>
+
+<!-- ============ P11 六大內容支柱 ============ -->
+<section class="slide">
+  <div class="logo"><div class="mark">P</div><div class="txt"><b>PERFECT TREND</b><span>原創課程</span></div></div>
+  <div class="kicker" style="margin-top:40px">CONTENT PILLARS</div>
+  <h2 class="mid" style="font-size:44px">6 大內容支柱 — 每個案照著填</h2>
+  <table class="tbl">
+    <tr><th style="width:16%">支柱</th><th style="width:46%">選題範例</th><th>帶客效果</th></tr>
+    <tr><td><b>破除迷思</b></td><td>預售屋真的比較便宜嗎？</td><td class="r">留言炸、打中焦慮</td></tr>
+    <tr><td><b>帶你走進去</b></td><td>30 秒走完 ____ 案的 3 房，一刀不剪</td><td class="r">畫面自帶吸引力</td></tr>
+    <tr><td><b>避坑警告</b></td><td>看預售屋，我一定會蹲下來看的 3 個地方</td><td class="r">全庫信任值最高</td></tr>
+    <tr><td><b>業務的一天</b></td><td>跟拍接待中心的一天：開門到送走最後一組</td><td class="r">讓客戶先認識人</td></tr>
+    <tr><td><b>區域行情</b></td><td>同樣 ____ 萬，A 區長這樣，B 區長這樣</td><td class="r">極限數字 × 極度反差</td></tr>
+    <tr><td><b>買房流程</b></td><td>簽約前你該問建商的 5 個問題</td><td class="r">出錢的長輩最買單</td></tr>
+  </table>
+</section>
+
+<!-- ============ P12 六步驟 ============ -->
+<section class="slide photo center" style="background-image:url(img/s12_flow.png)">
+  <div class="logo"><div class="mark">P</div><div class="txt"><b>PERFECT TREND</b><span>原創課程</span></div></div>
+  <div class="kicker" style="margin-top:34px">WORKFLOW</div>
+  <h2 class="mid">六步驟 AI 工作流程</h2>
+  <p class="sub" style="margin-top:6px">案場版：一位業務 or 一組企劃，就能跑完整條線。</p>
+  <div class="flow">
+    <div class="st"><div class="no">01</div><h4>人設定位</h4><span>Claude</span></div>
+    <div class="st"><div class="no">02</div><h4>選題</h4><span>Threads + Claude</span></div>
+    <div class="st"><div class="no">03</div><h4>拍攝</h4><span>剪映 / iPhone</span></div>
+    <div class="st"><div class="no">04</div><h4>剪輯</h4><span>開拍 App</span></div>
+    <div class="st"><div class="no">05</div><h4>發佈</h4><span>Claude / ChatGPT</span></div>
+    <div class="st"><div class="no">06</div><h4>數據分析</h4><span>平台 + Claude</span></div>
+  </div>
+</section>
+
+<!-- ============ P13 Step1 人設 ============ -->
+<section class="slide photo rev" style="background-image:url(img/s13_identity.png)">
+  <div class="logo"><div class="mark">P</div><div class="txt"><b>PERFECT TREND</b><span>原創課程</span></div></div>
+  <div class="stepbadge"><div class="sq"><b>1</b><span>STEP 1</span></div></div>
+  <h2 class="mid" style="margin-top:150px;font-size:44px">人設定位</h2>
+  <p class="sub" style="margin-top:6px">帳號的人設，不是「聯盛地產官方」，是「<b style="color:#fff">最懂這幾個案子的那個人</b>」。</p>
+  <div class="prompt" style="margin-top:22px">
+    <div class="lab">PROMPT 範例 → Claude / ChatGPT</div>
+    <p>我是高雄聯盛地產的業務，主打 <span class="v">[OO 建案 / OO 區域]</span>。請幫我定位：</p>
+    <ol><li>我的 3 個差異化標籤</li><li>理想客戶畫像（年齡／預算／在意什麼）</li><li>一句話人設 slogan</li><li>5 個可以反覆拍的內容支柱</li></ol>
+  </div>
+</section>
+
+<!-- ============ P14 Step2 選題 ============ -->
+<section class="slide photo center" style="background-image:url(img/s09_topic.png)">
+  <div class="logo"><div class="mark">P</div><div class="txt"><b>PERFECT TREND</b><span>原創課程</span></div></div>
+  <div class="stepbadge"><div class="sq"><b>2</b><span>STEP 2</span></div></div>
+  <h2 class="mid" style="margin-top:150px">選題</h2>
+  <div style="color:#e2e2e8;font-size:18px;margin-top:8px">核心公式：<span class="r" style="font-weight:700">購屋族焦慮 × 你手上案子的日常 = 不會冷掉的選題</span></div>
+  <div class="cards" style="margin-top:24px">
+    <div class="card hot"><div class="tag">A</div><h3>抓客戶在意什麼</h3><p>到 Threads / IG / 在地社團看高雄人在焦慮什麼，記下關鍵字</p></div>
+    <div class="card hot"><div class="tag">B</div><h3>丟給 Claude 生選題</h3><p>貼上客戶的問題＋你的人設，每題生 3 個短影音標題</p></div>
+    <div class="card hot"><div class="tag">C</div><h3>每天 10 分鐘</h3><p>最好的來源是「今天接待的客戶問了什麼」，一天產出 9 個選題</p></div>
+  </div>
+</section>
+
+<!-- ============ P15 Step3 拍攝 ============ -->
+<section class="slide photo rev dim" style="background-image:url(img/re_shoot.png)">
+  <div class="logo"><div class="mark">P</div><div class="txt"><b>PERFECT TREND</b><span>原創課程</span></div></div>
+  <div class="stepbadge"><div class="sq"><b>3</b><span>STEP 3</span></div></div>
+  <h2 class="mid" style="margin-top:150px">拍攝</h2>
+  <p class="sub" style="margin-top:6px">不卡詞、不重拍，一次拍完。</p>
+  <div class="opts">
+    <div class="opt"><div class="L">A</div><div><h4>剪映提詞機 <span class="pill paid">付費</span></h4><p>文字自動捲動，看著螢幕講就好</p></div></div>
+    <div class="opt"><div class="L">B</div><div><h4>iPhone 暫停分段拍 <span class="pill free">免費</span></h4><p>錄影中暫停再繼續，不需剪輯拼接</p></div></div>
+  </div>
+  <p class="tip" style="max-width:660px;line-height:1.75"><b>💡 情緒是必需品：</b>人出鏡就用表情和語氣給情緒，不出鏡就用 OS 口白給情緒——<b>空鏡配規格表 ＝ 沒有情緒 ＝ 沒有完播</b>。<br>另外，聲音比畫面重要，現場一定戴領夾麥。</p>
+</section>
+
+<!-- ============ P16 Step4 剪輯 ============ -->
+<section class="slide photo rev" style="background-image:url(img/s16_edit.png)">
+  <div class="logo"><div class="mark">P</div><div class="txt"><b>PERFECT TREND</b><span>原創課程</span></div></div>
+  <div class="stepbadge"><div class="sq"><b>4</b><span>STEP 4</span></div></div>
+  <h2 class="mid" style="margin-top:150px">剪輯</h2>
+  <p class="sub" style="margin-top:6px">素材丟上去 → 自動出片，從 1 小時壓到 <span class="r">10 分鐘</span>。</p>
+  <div style="margin-top:22px;max-width:560px">
+    <div class="opt"><div class="L">1</div><div><h4>自動上字幕</h4><p>語音辨識準確，中文沒問題</p></div></div>
+    <div class="opt"><div class="L">2</div><div><h4>套版剪輯</h4><p>選模板 → 丟素材 → 自動剪好</p></div></div>
+    <div class="opt"><div class="L">3</div><div><h4>素材直丟</h4><p>自動切片、組合、配樂</p></div></div>
+  </div>
+</section>
+
+<!-- ============ P17 Step5 發佈 ============ -->
+<section class="slide photo" style="background-image:url(img/s17_publish.png)">
+  <div class="logo"><div class="mark">P</div><div class="txt"><b>PERFECT TREND</b><span>原創課程</span></div></div>
+  <div class="stepbadge"><div class="sq"><b>5</b><span>STEP 5</span></div></div>
+  <h2 class="mid" style="margin-top:150px">發佈</h2>
+  <p class="sub" style="margin-top:6px">給客戶一個點進來的理由。</p>
+  <div style="display:flex;gap:40px;margin-top:20px;align-items:flex-start">
+    <div style="max-width:280px">
+      <div style="margin-bottom:14px"><b style="color:var(--red);font-size:22px">1</b> <b style="font-size:18px">具體數字</b><p style="color:var(--muted);font-size:14px">「3 個地雷」比「幾個地雷」吸引人</p></div>
+      <div style="margin-bottom:14px"><b style="color:var(--red);font-size:22px">2</b> <b style="font-size:18px">情緒鉤子</b><p style="color:var(--muted);font-size:14px">用「差點」「後悔」「沒想到」製造懸念</p></div>
+      <div><b style="color:var(--red);font-size:22px">3</b> <b style="font-size:18px">不要劇透</b><p style="color:var(--muted);font-size:14px">標題是鉤子，不是答案</p></div>
+    </div>
+    <div class="prompt" style="max-width:440px">
+      <div class="lab">PROMPT 範例</div>
+      <p>這支片主題：<span class="v">[建案 / 區域內容簡述]</span>。請幫我：</p>
+      <ol><li>3 個吸睛標題（15 字內、口語化）</li><li>一段貼文描述（80 字內，結尾引導私訊「格局」或「總價」）</li></ol>
+    </div>
+  </div>
+</section>
+
+<!-- ============ P18 Step6 數據 ============ -->
+<section class="slide photo rev" style="background-image:url(img/s18_data.png)">
+  <div class="logo"><div class="mark">P</div><div class="txt"><b>PERFECT TREND</b><span>原創課程</span></div></div>
+  <div class="stepbadge"><div class="sq"><b>6</b><span>STEP 6</span></div></div>
+  <h2 class="mid" style="margin-top:150px">數據分析</h2>
+  <p class="sub" style="margin-top:6px">知道什麼有效，什麼要砍。</p>
+  <div style="display:flex;gap:16px;margin-top:20px;max-width:560px">
+    <div class="opt" style="flex:1"><div><h4>IG 專業帳號</h4><p>留存率・分享數・儲存數</p></div></div>
+    <div class="opt" style="flex:1"><div><h4>TikTok 創作者中心</h4><p>平均觀看時長・完播率</p></div></div>
+  </div>
+  <div class="prompt" style="margin-top:18px;max-width:600px">
+    <div class="lab">AI 解讀 PROMPT</div>
+    <p>這是我最近 5 支影片的數據截圖，請幫我分析：</p>
+    <ol><li>哪些選題類型表現最好</li><li>留存率斷點可能的原因</li><li>哪種選題最容易帶來<span class="v">私訊詢問／預約賞屋</span></li></ol>
+  </div>
+</section>
+
+<!-- ============ P19 你手上的案子該拍什麼 ============ -->
+<section class="slide">
+  <div class="logo"><div class="mark">P</div><div class="txt"><b>PERFECT TREND</b><span>原創課程</span></div></div>
+  <div class="kicker" style="margin-top:40px">BY PRODUCT TYPE</div>
+  <h2 class="mid" style="font-size:46px">你手上的案子，該拍什麼？</h2>
+  <div class="acol" style="margin-top:24px">
+    <div class="c"><div class="hd">預售屋<small>PRE-SALE</small></div>
+      <ul><li>工地進度縮時（每月一支）</li><li>建材開箱、樣品屋中島</li><li>公設示意圖 vs 實際現況</li><li>交屋前驗屋要看哪幾點</li></ul></div>
+    <div class="c"><div class="hd">新成屋<small>NEW BUILD</small></div>
+      <ul><li>30 秒走完格局，一刀不剪</li><li>公設實測（健身房、閱覽室）</li><li>清晨／黃昏採光實拍</li><li>走出大門的生活圈開箱</li></ul></div>
+    <div class="c"><div class="hd">透天<small>TOWNHOUSE</small></div>
+      <ul><li>一層一層走上去的動線</li><li>車庫實測（車進得去嗎）</li><li>頂樓視野與加蓋現況</li><li>三代同堂怎麼分配樓層</li></ul></div>
+  </div>
+  <div class="foot-line">先挑<span class="r">一個主推案</span>，把六大支柱各拍一支，這週就開拍。</div>
+</section>
+
+<!-- ============ P20 八條紅線 ============ -->
+<section class="slide">
+  <div class="logo"><div class="mark">P</div><div class="txt"><b>PERFECT TREND</b><span>原創課程</span></div></div>
+  <div class="kicker" style="margin-top:36px">COMPLIANCE</div>
+  <h2 class="mid" style="font-size:44px">房產短影音的<span style="color:var(--red)">八條紅線</span></h2>
+  <p class="sub" style="margin-top:8px;max-width:820px">一支違規的片，賠掉的是整個案場的信用。<b style="color:#fff">拍之前先過這八條。</b></p>
+  <div class="rl">
+    <div class="i"><b class="no">1</b><div><h4>不保證增值、不保證投報</h4><p>「穩賺」「一定漲」「保證出租」全部不能講</p></div></div>
+    <div class="i"><b class="no">2</b><div><h4>廣告內容要與實際相符</h4><p>講得到、做不到，就是不實廣告</p></div></div>
+    <div class="i"><b class="no">3</b><div><h4>示意圖要標示示意</h4><p>樣品屋傢俱、公設 3D 圖須註明非標準配備</p></div></div>
+    <div class="i"><b class="no">4</b><div><h4>價格要講清楚是哪一戶</h4><p>「XXX 萬起」要標明戶別、坪數、車位含不含</p></div></div>
+    <div class="i"><b class="no">5</b><div><h4>引用行情要標來源與日期</h4><p>實價登錄截圖要看得到時間，不用過期數字</p></div></div>
+    <div class="i"><b class="no">6</b><div><h4>不點名貶低競品建案</h4><p>要比較就比「區域」，不比「別人家的案」</p></div></div>
+    <div class="i"><b class="no">7</b><div><h4>客戶與屋主入鏡要授權</h4><p>口頭不算，拍之前先取得同意</p></div></div>
+    <div class="i"><b class="no">8</b><div><h4>不承諾貸款成數與核貸</h4><p>銀行的事交給銀行，只講流程不打包票</p></div></div>
+  </div>
+  <div style="margin-top:16px;color:var(--dim);font-size:13px">※ 本頁為內容產製的自律準則；正式對外發布前，請一併與公司法務／經紀人複核個案適用之法規。</div>
+</section>
+
+<!-- ============ P21 工具總表 + 收尾 ============ -->
+<section class="slide">
+  <div class="logo"><div class="mark">P</div><div class="txt"><b>PERFECT TREND</b><span>原創課程</span></div></div>
+  <div class="kicker" style="margin-top:38px">TOOL SUMMARY</div>
+  <h2 class="mid" style="font-size:40px">工具總表</h2>
+  <table class="tbl" style="font-size:13.5px;margin-top:14px">
+    <tr><th>步驟</th><th>工具</th><th>用途</th><th style="width:96px">費用</th></tr>
+    <tr><td>人設定位</td><td>Claude / ChatGPT</td><td>產出人設框架與內容支柱</td><td class="g">免費</td></tr>
+    <tr><td>選題</td><td>Threads + Claude</td><td>購屋族焦慮 × 案子日常</td><td class="g">免費</td></tr>
+    <tr><td>拍攝</td><td>剪映提詞機</td><td>自動捲動腳本</td><td class="r">付費</td></tr>
+    <tr><td>拍攝</td><td>iPhone 相機</td><td>暫停分段拍攝</td><td class="g">免費</td></tr>
+    <tr><td>剪輯</td><td>開拍 App</td><td>自動字幕、套版、配樂</td><td class="r">部分付費</td></tr>
+    <tr><td>發佈</td><td>Claude / ChatGPT</td><td>標題與描述文案</td><td class="g">免費</td></tr>
+    <tr><td>數據分析</td><td>平台內建 + Claude</td><td>數據解讀與行動建議</td><td class="g">免費</td></tr>
+  </table>
+  <div style="margin-top:18px;background:linear-gradient(90deg,#1a0e11,#0e0c0d);border:1px solid var(--red-deep);border-radius:14px;padding:18px 26px;display:flex;justify-content:space-between;align-items:center">
+    <div>
+      <div style="font-size:26px;font-weight:900">先從「有發片」開始</div>
+      <div style="color:var(--muted);font-size:15px;margin-top:4px">不要追求完美，追求持續。</div>
+    </div>
+    <div style="text-align:right">
+      <div style="font-family:Oswald;color:var(--red);font-size:13px;letter-spacing:2px;margin-bottom:4px">當堂作業</div>
+      <div style="font-size:14.5px;color:#e2e2e8;max-width:400px">挑一個主推案，用 Claude 產 10 題破除迷思選題 ＋ 3 個內容支柱，<b style="color:#fff">這週先發第一支。</b></div>
+    </div>
+  </div>
+</section>
+
+</div></div>
+
+<div id="counter">01 / 21</div>
+<div id="nav"></div>
+<div id="hint">← → 翻頁 ・ F 全螢幕 ・ <a href="課堂案例.html" style="color:#ff3355;text-decoration:none;font-weight:700">🎬 案例庫</a></div>
+
+<script>
+const deck=document.getElementById('deck');
+const slides=[...document.querySelectorAll('.slide')];
+let i=0;
+function scale(){const s=Math.min(innerWidth/1280,innerHeight/720);deck.style.transform='scale('+s+')';}
+function show(n){i=(n+slides.length)%slides.length;slides.forEach((s,x)=>s.classList.toggle('active',x===i));
+  document.getElementById('counter').textContent=String(i+1).padStart(2,'0')+' / '+String(slides.length).padStart(2,'0');
+  [...document.querySelectorAll('#nav .dot')].forEach((d,x)=>d.classList.toggle('on',x===i));}
+const nav=document.getElementById('nav');
+slides.forEach((_,x)=>{const d=document.createElement('div');d.className='dot';d.onclick=()=>show(x);nav.appendChild(d);});
+addEventListener('keydown',e=>{
+  if(['ArrowRight','ArrowDown',' ','PageDown'].includes(e.key)){show(i+1);e.preventDefault();}
+  if(['ArrowLeft','ArrowUp','PageUp'].includes(e.key)){show(i-1);e.preventDefault();}
+  if(e.key==='f'||e.key==='F'){if(!document.fullscreenElement)document.documentElement.requestFullscreen();else document.exitFullscreen();}
+});
+addEventListener('resize',scale);scale();show(0);
+</script>
+</body>
+</html>
