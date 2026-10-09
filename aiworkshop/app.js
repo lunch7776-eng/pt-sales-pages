@@ -172,7 +172,11 @@
   function jumpToPrompt(pid) {
     var el = $('prompt-' + pid);
     if (!el) return;
-    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // 瀏覽器在 html{scroll-behavior:smooth} 下常忽略程式捲動，先暫時改成 auto 再捲
+    var de = document.documentElement, prev = de.style.scrollBehavior;
+    de.style.scrollBehavior = 'auto';
+    el.scrollIntoView({ block: 'center' });
+    setTimeout(function () { de.style.scrollBehavior = prev; }, 50);
     el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash');
     setTimeout(function () { el.classList.remove('flash'); }, 2200);
   }
@@ -316,7 +320,7 @@
     $('teacher-toggle').addEventListener('click', function () { setTeacher(!state.teacher); });
     $('tt-stop').addEventListener('click', stopTimer);
     $('tt-label').addEventListener('click', function () {
-      if (timer.idx >= 0 && cards[timer.idx]) cards[timer.idx].scrollIntoView({ block: 'start' });
+      if (timer.idx >= 0 && cards[timer.idx]) { var de2 = document.documentElement, pv = de2.style.scrollBehavior; de2.style.scrollBehavior = 'auto'; cards[timer.idx].scrollIntoView({ block: 'start' }); setTimeout(function () { de2.style.scrollBehavior = pv; }, 50); }
     });
 
     // 手機課表開合
