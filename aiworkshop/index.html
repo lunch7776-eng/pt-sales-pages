@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>AI 短影音工作坊</title>
+  <meta name="theme-color" content="#1a73e8">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="track-anim">
+  <a class="skip-link" href="#main">跳到課程內容</a>
+
+  <header class="hero" id="top">
+    <img class="poster" src="assets/poster.webp" alt="課程海報" width="2000" height="1125" fetchpriority="high">
+    <h1 class="hero-title" id="hero-title">AI 短影音工作坊</h1>
+    <div class="hero-meta" id="hero-meta"></div>
+  </header>
+
+  <div class="toolbar" id="toolbar" role="toolbar" aria-label="課程工具列">
+    <div class="tb-row">
+      <button type="button" class="btn nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="schedule">課表 ▾</button>
+      <nav class="tb-links" id="tb-links" aria-label="常用網站"></nav>
+    </div>
+    <div class="tb-row">
+      <div class="track-switch" role="group" aria-label="選擇軌道" id="track-switch">
+        <button type="button" class="btn track-btn" data-track="anim" aria-pressed="true">動畫軌</button>
+        <button type="button" class="btn track-btn" data-track="real" aria-pressed="false">真人軌</button>
+      </div>
+      <button type="button" class="btn teacher-toggle" id="teacher-toggle" role="switch" aria-checked="false">講師模式</button>
+    </div>
+    <div class="top-timer" id="top-timer" aria-live="polite">
+      <span class="tt-label" id="tt-label">尚未開始計時</span>
+      <span class="tt-time" id="tt-time"></span>
+      <button type="button" class="btn tt-stop" id="tt-stop" hidden>停止</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <aside class="schedule" id="schedule" aria-label="課表">
+      <h2 class="sched-heading">今日課表</h2>
+      <ol class="sched-list" id="sched-list"></ol>
+    </aside>
+    <main class="main" id="main" tabindex="-1"></main>
+  </div>
+
+  <footer class="footer" id="footer"></footer>
+
+  <script src="content.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
