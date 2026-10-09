@@ -241,6 +241,29 @@
     return fig;
   }
 
+
+  // ── 「你會得到這個」範例輸出 ──
+  function expectBlock(ex) {
+    if (!ex) return null;
+    var list = Array.isArray(ex) ? ex : [ex];
+    var kids = list.map(function (e) {
+      e = e || {};
+      var body = null;
+      if (e.type === 'image' && e.src) {
+        var im = h('img', { src: 'assets/expect/' + safeId(e.src.replace(/\.[a-z0-9]+$/i, '')) + (e.src.match(/\.[a-z0-9]+$/i) || ['.jpg'])[0], alt: str(e.caption) || '範例輸出', loading: 'lazy' });
+        body = h('a', { class: 'expect-img', href: im.getAttribute('src'), target: '_blank', rel: 'noopener' }, im);
+      } else if (e.type === 'video' && e.src) {
+        var v = h('video', { controls: true, playsinline: true, preload: 'metadata', class: 'expect-video' });
+        v.src = /\//.test(e.src) ? e.src : 'assets/videos/' + safeId(e.src.replace(/\.mp4$/i, '')) + '.mp4';
+        body = v;
+      } else if (e.type === 'text' && e.text) {
+        body = h('pre', { class: 'expect-text' }, str(e.text));
+      }
+      return h('div', { class: 'expect-item' }, [body, e.caption ? h('p', { class: 'expect-cap' }, str(e.caption)) : null]);
+    });
+    return h('div', { class: 'expect-box' }, [h('div', { class: 'expect-head' }, '你會得到這個'), h('div', { class: 'expect-items' }, kids)]);
+  }
+
   function promptCard(p) {
     p = p || {};
     var a = str(p.anim || p.real), r = str(p.real || p.anim);
@@ -286,7 +309,8 @@
       // 模板版
       same ? h('pre', { class: 'prompt-text pt-tpl' }, a)
         : [h('pre', { class: 'prompt-text pt-tpl pt-anim' }, a), h('pre', { class: 'prompt-text pt-tpl pt-real' }, r)],
-      p.note ? h('p', { class: 'prompt-note' }, '小提醒：' + str(p.note)) : null
+      p.note ? h('p', { class: 'prompt-note' }, '小提醒：' + str(p.note)) : null,
+      expectBlock(p.expect)
     ].flat());
     return card;
   }
@@ -411,7 +435,7 @@
       arr(s.teacher).length ? h('ul', null, arr(s.teacher).map(function (t) { return h('li', null, linkify(t)); })) : null
     ]));
 
-    if (arr(s.steps).length) add(card, [h('h3', { class: 'sub-h' }, '跟著做'), stepsList(s.steps)]);
+    if (arr(s.steps).length) add(card, [h('h3', { class: 'sub-h' }, '跟著做'), stepsList(s.steps), expectBlock(s.expect)]);
     if (arr(s.prompts).length) {
       add(card, [h('h3', { class: 'sub-h' }, '提示詞（按「複製」再貼上）'),
         h('div', { class: 'prompts' }, arr(s.prompts).map(promptCard))]);

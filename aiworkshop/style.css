@@ -374,3 +374,14 @@ body.track-anim .prompt-card .pt-real, body.track-real .prompt-card .pt-anim { d
 .why-flow b{display:block;margin-bottom:6px;font-size:20px}
 .why-flow p{margin:0}
 .step-btn{display:inline-block;margin-top:8px}
+
+/* 你會得到這個 */
+.expect-box{margin-top:12px;border:2px dashed #1e8e3e;border-radius:14px;padding:12px;background:#f1f8f4}
+.expect-head{font-weight:700;color:#1e8e3e;font-size:17px;margin-bottom:8px}
+.expect-head::before{content:"✓ ";}
+.expect-items{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.expect-item{min-width:0}
+.expect-img img{width:100%;height:auto;display:block;border-radius:10px;border:1px solid #dadce0;background:#fff}
+.expect-video{width:100%;max-width:300px;aspect-ratio:9/16;background:#000;border-radius:10px;display:block}
+.expect-text{white-space:pre-wrap;font-family:inherit;font-size:16px;line-height:1.7;background:#fff;border:1px solid #dadce0;border-radius:10px;padding:12px;margin:0}
+.expect-cap{margin:6px 0 0;font-size:14px;color:#5f6368}
