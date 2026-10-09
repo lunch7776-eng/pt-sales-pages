@@ -143,13 +143,76 @@
     return fig;
   }
 
+
+  // ── 步驟文字自動連結：工具名→外部網站；「提示詞卡名」與關鍵字→跳到該張卡 ──
+  var PROMPT_INDEX = {};
+  var KEYWORD_TO_PROMPT = {
+    '三視圖': 'p-sheet', '角色卡': 'p-card', '外型描述': 'p-card', '修正三視圖': 'p-sheet-fix',
+    '故事發想': 'p-idea', '5 個點子': 'p-idea', '五個點子': 'p-idea',
+    '4 格分鏡': 'p-board', '四格分鏡': 'p-board', '開頭加強': 'p-hook',
+    '場景圖': 'p-scene', '道具圖': 'p-prop', '提示詞模板': 'p-shot-tpl', '鏡頭 prompt 模板': 'p-shot-tpl',
+    '固定句': 'p-ban', '修指令四招': 'p-fix4', '分享句': 'p-share', '重做修正': 'p-redo', '接片檢查表': 'p-check',
+    '鏡頭 1': 'p-shot1', '鏡頭 2': 'p-shot2', '鏡頭 3': 'p-shot3', '鏡頭 4': 'p-shot4'
+  };
+  function allPromptIds() {
+    var ids = {};
+    arr(C.sections).forEach(function (sec) { arr(sec.prompts).forEach(function (p) { if (p && p.id) ids[safeId(p.id)] = p; }); });
+    return ids;
+  }
+  var PROMPTS_BY_ID = null;
+  function resolvePromptByTitle(name) {
+    PROMPTS_BY_ID = PROMPTS_BY_ID || allPromptIds();
+    var keys = Object.keys(PROMPTS_BY_ID);
+    for (var i = 0; i < keys.length; i++) {
+      var t = str(PROMPTS_BY_ID[keys[i]].title); var shortT = t.split('｜')[0].trim();
+      if (t === name || shortT === name || t.indexOf(name) === 0) return keys[i];
+    }
+    return KEYWORD_TO_PROMPT[name] && PROMPTS_BY_ID[KEYWORD_TO_PROMPT[name]] ? KEYWORD_TO_PROMPT[name] : null;
+  }
+  function jumpToPrompt(pid) {
+    var el = $('prompt-' + pid);
+    if (!el) return;
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash');
+    setTimeout(function () { el.classList.remove('flash'); }, 2200);
+  }
+  function promptLink(label, pid) {
+    return h('a', { class: 'step-link to-prompt', href: '#prompt-' + pid, title: '跳到這張提示詞卡',
+      onclick: function (e) { e.preventDefault(); jumpToPrompt(pid); } }, label);
+  }
+  function extLink(label, url) {
+    url = safeUrl(url);
+    return url ? h('a', { class: 'step-link ext', href: url, target: '_blank', rel: 'noopener' }, label + ' ↗') : label;
+  }
+  function linkify(text) {
+    text = str(text);
+    var links = (C.meta && C.meta.links) || {};
+    PROMPTS_BY_ID = PROMPTS_BY_ID || allPromptIds();
+    var kw = Object.keys(KEYWORD_TO_PROMPT).filter(function (k) { return PROMPTS_BY_ID[KEYWORD_TO_PROMPT[k]]; })
+      .sort(function (a, b) { return b.length - a.length; }).map(function (k) { return k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); });
+    var re = new RegExp('(「[^」]{1,24}」)|(gemini\\.google\\.com|Gemini)|(labs\\.google\\/flow|flow\\.google\\.com|Google Flow|Flow)|(班級雲端資料夾|班級雲端)' + (kw.length ? '|(' + kw.join('|') + ')' : ''), 'g');
+    var out = [], last = 0, m;
+    while ((m = re.exec(text)) !== null) {
+      if (m.index > last) out.push(text.slice(last, m.index));
+      var tok = m[0];
+      if (m[1]) { var pid = resolvePromptByTitle(tok.slice(1, -1)); out.push(pid ? promptLink(tok, pid) : tok); }
+      else if (m[2]) out.push(extLink(tok, links.gemini || 'https://gemini.google.com'));
+      else if (m[3]) out.push(extLink(tok, links.flow || 'https://labs.google/flow'));
+      else if (m[4]) out.push(links.drive ? extLink(tok, links.drive) : tok);
+      else if (m[5]) { var pid2 = KEYWORD_TO_PROMPT[tok]; out.push(pid2 && PROMPTS_BY_ID[pid2] ? promptLink(tok, pid2) : tok); }
+      last = m.index + tok.length;
+    }
+    if (last < text.length) out.push(text.slice(last));
+    return out;
+  }
+
   function stepsList(steps) {
     return h('ol', { class: 'steps' }, arr(steps).map(function (s, i) {
       var st = typeof s === 'string' ? { text: s } : (s || {});
       var shot = safeId(st.shot);
       return h('li', { class: 'step' + (shot ? ' has-shot' : '') }, [
         h('span', { class: 'step-num', 'aria-hidden': 'true' }, String(i + 1)),
-        h('div', { class: 'step-text' }, str(st.text)),
+        h('div', { class: 'step-text' }, linkify(st.text)),
         shot ? shotFigure(shot) : null
       ]);
     }));
@@ -175,7 +238,9 @@
     var a = str(p.anim || p.real), r = str(p.real || p.anim);
     var same = a === r;
     var getText = function () { return same ? a : (state.track === 'real' ? r : a); };
-    return h('div', { class: 'prompt-card' + (same ? ' same' : '') }, [
+    var pid = safeId(p.id);
+    if (pid) PROMPT_INDEX[pid] = { title: str(p.title), short: str(p.title).split('｜')[0].trim() };
+    return h('div', { class: 'prompt-card' + (same ? ' same' : ''), id: pid ? 'prompt-' + pid : null }, [
       h('div', { class: 'prompt-head' }, [
         h('h4', { class: 'prompt-title' }, [
           str(p.title) || '提示詞',
@@ -307,7 +372,7 @@
     timerUI[idx] = { btn: btn, disp: disp, card: card, minutes: mins };
     add(card, h('div', { class: 'teacher-box' }, [
       h('div', { class: 'teacher-head' }, [h('strong', null, '講師要點'), h('div', { class: 'teacher-ctrl' }, [disp, btn])]),
-      arr(s.teacher).length ? h('ul', null, arr(s.teacher).map(function (t) { return h('li', null, str(t)); })) : null
+      arr(s.teacher).length ? h('ul', null, arr(s.teacher).map(function (t) { return h('li', null, linkify(t)); })) : null
     ]));
 
     if (arr(s.steps).length) add(card, [h('h3', { class: 'sub-h' }, '跟著做'), stepsList(s.steps)]);
@@ -321,7 +386,7 @@
     if (arr(s.faq).length) {
       add(card, [h('h3', { class: 'sub-h' }, '常見問題'), h('div', { class: 'faq' }, arr(s.faq).map(function (f) {
         f = f || {};
-        return h('details', { class: 'fold' }, [h('summary', null, str(f.q)), h('div', { class: 'fold-body' }, str(f.a))]);
+        return h('details', { class: 'fold' }, [h('summary', null, str(f.q)), h('div', { class: 'fold-body' }, linkify(f.a))]);
       }))]);
     }
     var sampleById = {};
