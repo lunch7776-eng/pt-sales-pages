@@ -146,6 +146,7 @@
 
 
   // ── 步驟文字自動連結：工具名→外部網站；「提示詞卡名」與關鍵字→跳到該張卡 ──
+  var SINGLE_TRACK = true;   // 2026-10-10 決定：不分兩軌，只走動畫角色；真人演員版改成一張備用卡
   var PROMPT_INDEX = {};
   var KEYWORD_TO_PROMPT = {
     '三視圖': 'p-sheet', '角色卡': 'p-card', '外型描述': 'p-card', '修正三視圖': 'p-sheet-fix',
@@ -215,9 +216,11 @@
     return h('ol', { class: 'steps' }, arr(steps).map(function (s, i) {
       var st = typeof s === 'string' ? { text: s } : (s || {});
       var shot = safeId(st.shot);
+      var lk = st.link && C.meta && C.meta.links ? safeUrl(C.meta.links[st.link]) : '';
+      var lkLabel = { vote: '打開投票表單 ↗', survey: '打開課後問卷 ↗', ig: '老師的 Instagram ↗', drive: '打開班級雲端 ↗' }[st.link] || '打開 ↗';
       return h('li', { class: 'step' + (shot ? ' has-shot' : '') }, [
         h('span', { class: 'step-num', 'aria-hidden': 'true' }, String(i + 1)),
-        h('div', { class: 'step-text' }, linkify(st.text)),
+        h('div', { class: 'step-text' }, [linkify(st.text), lk ? h('div', null, h('a', { class: 'btn primary step-btn', href: lk, target: '_blank', rel: 'noopener' }, lkLabel)) : null].flat()),
         shot ? shotFigure(shot) : null
       ]);
     }));
@@ -268,7 +271,7 @@
       h('div', { class: 'prompt-head' }, [
         h('h4', { class: 'prompt-title' }, [
           str(p.title) || '提示詞',
-          same ? h('span', { class: 'track-tag' }, '兩軌通用')
+          (same || SINGLE_TRACK) ? null
             : [h('span', { class: 'track-tag tag-anim' }, trackLabel('anim')),
                h('span', { class: 'track-tag tag-real' }, trackLabel('real'))]
         ].flat()),
@@ -321,7 +324,7 @@
       ]),
       subParts.length ? h('p', { class: 'hero-sub' }, subParts.join('｜')) : null
     ]);
-    if (C.tracks) {
+    if (C.tracks && !SINGLE_TRACK) {
       meta.appendChild(h('div', { class: 'track-cards' }, ['anim', 'real'].map(function (tr) {
         var t = C.tracks[tr] || {};
         return h('button', { type: 'button', class: 'track-card', 'data-track': tr, onclick: function () { setTrack(tr); } },
@@ -332,16 +335,17 @@
 
   function renderToolbar() {
     var links = (C.meta && C.meta.links) || {};
-    var defs = [['gemini', 'Gemini'], ['flow', 'Flow'], ['drive', '班級雲端']];
+    var defs = [['gemini', 'Gemini'], ['flow', 'Flow'], ['drive', '班級雲端'], ['vote', '投票'], ['survey', '問卷']];
     var box = $('tb-links');
     defs.forEach(function (d) {
       var url = safeUrl(links[d[0]]);
-      if (!url && d[0] === 'drive') return;   // 班級雲端沒連結就完全不顯示
+      if (!url && (d[0] === 'drive' || d[0] === 'vote' || d[0] === 'survey')) return;   // 沒連結就完全不顯示
       box.appendChild(url
         ? h('a', { class: 'btn link-btn', href: url, target: '_blank', rel: 'noopener noreferrer' }, [d[1], h('span', { class: 'ext', 'aria-hidden': 'true' }, ' ↗')])
         : h('span', { class: 'btn link-btn disabled', 'aria-disabled': 'true', title: '尚未提供連結' }, d[1]));
     });
     Array.prototype.forEach.call(document.querySelectorAll('.track-btn'), function (b) {
+      if (SINGLE_TRACK) { var grp = b.parentElement; if (grp) grp.hidden = true; return; }
       b.textContent = trackLabel(b.getAttribute('data-track'));
       b.addEventListener('click', function () { setTrack(b.getAttribute('data-track')); });
     });
@@ -444,8 +448,48 @@
       add(card, [h('h3', { class: 'sub-h' }, '班級作品（點影片直接播放）'), emb,
         h('p', null, h('a', { class: 'btn primary', href: str(s.embedLink || s.embed), target: '_blank', rel: 'noopener' }, '打開班級雲端資料夾 ↗ 上傳作品'))]);
     }
+    if (idx === 0) card.appendChild(modelsBlock());
     cards[idx] = card;
     return card;
+  }
+
+  // ── 影片生成模型介紹（models.json）──
+  function ytId(u) { var m = /(?:v=|youtu\.be\/)([A-Za-z0-9_-]{6,})/.exec(str(u)); return m ? m[1] : ''; }
+  function modelsBlock() {
+    var box = h('div', { class: 'models-box', id: 'models' }, [
+      h('h3', { class: 'sub-h' }, '現在有哪些 AI 影片生成工具？'),
+      h('p', { class: 'models-intro' }, '每個都能用文字生出影片。老師會播 2 到 3 支給大家看。'),
+      h('div', { class: 'models-grid', id: 'models-grid' }, h('div', { class: 'models-loading' }, '載入中…'))
+    ]);
+    fetch('models.json').then(function (r) { return r.json(); }).then(function (data) {
+      var grid = box.querySelector('#models-grid'); grid.textContent = '';
+      arr(data.models).forEach(function (m) {
+        var id = ytId(m.youtube);
+        var fr = null;
+        if (id) {
+          fr = document.createElement('iframe');
+          fr.src = 'https://www.youtube-nocookie.com/embed/' + id + '?rel=0';
+          fr.setAttribute('title', str(m.name) + ' 官方示範'); fr.setAttribute('loading', 'lazy');
+          fr.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen');
+          fr.setAttribute('allowfullscreen', '');
+        }
+        grid.appendChild(h('article', { class: 'model-card' + (m.id === 'veo' ? ' pick' : '') }, [
+          fr ? h('div', { class: 'model-video' }, fr) : null,
+          h('h4', null, [str(m.name), m.id === 'veo' ? h('span', { class: 'pick-tag' }, '我們用這個') : null]),
+          h('p', { class: 'model-line' }, str(m.oneLiner)),
+          h('ul', { class: 'model-facts' }, [
+            h('li', null, [h('b', null, '最厲害：'), str(m.strength)]),
+            h('li', null, [h('b', null, '免費：'), str(m.free)]),
+            m.id !== 'veo' ? h('li', null, [h('b', null, '為什麼不選：'), str(m.whyNot)]) : null
+          ]),
+          m.youtube ? h('a', { class: 'step-link ext', href: safeUrl(m.youtube), target: '_blank', rel: 'noopener' }, '在 YouTube 看 ↗') : null
+        ]));
+      });
+      if (data.whyFlow) box.appendChild(h('div', { class: 'why-flow' }, [h('b', null, '為什麼我們選 Google Flow？'), h('p', null, str(data.whyFlow))]));
+    }).catch(function () {
+      var grid = box.querySelector('#models-grid'); grid.textContent = '模型介紹載入失敗，請重新整理。';
+    });
+    return box;
   }
 
   function sampleCard(x) {
@@ -506,9 +550,20 @@
     ]);
   }
 
+  function howtoBlock() {
+    var hw = C.howto;
+    if (!hw || !arr(hw.steps).length) return null;
+    return h('section', { class: 'card howto', id: 'howto', 'aria-labelledby': 'howto-t' }, [
+      h('h2', { class: 'sec-title', id: 'howto-t' }, str(hw.title) || '這個網站怎麼用'),
+      stepsList(hw.steps)
+    ]);
+  }
+
   function renderMain() {
     var main = $('main'), list = $('sched-list');
     var secs = arr(C.sections);
+    var howto = howtoBlock();
+    if (howto) { main.appendChild(howto); list.appendChild(h('li', null, h('a', { class: 'sched-item type-prep', href: '#howto' }, [h('span', { class: 'sched-time' }, '開始前'), h('span', { class: 'sched-title' }, '網站怎麼用')]))); }
     var prep = prepBlock();
     if (prep) { main.appendChild(prep); list.appendChild(navLink('#prep', 'extra', '課前', '', str(C.prep.title) || '課前準備')); }
     secs.forEach(function (s, i) {
@@ -528,6 +583,7 @@
 
   /* ---------- 狀態切換 ---------- */
   function setTrack(tr) {
+    if (SINGLE_TRACK) tr = 'anim';
     state.track = tr === 'real' ? 'real' : 'anim';
     document.body.classList.toggle('track-real', state.track === 'real');
     document.body.classList.toggle('track-anim', state.track === 'anim');
