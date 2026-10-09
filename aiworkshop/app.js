@@ -339,6 +339,14 @@
         return videoBox(v, x ? str(x.title) : '');
       }))]);
     }
+    if (s.embed) {
+      var emb = h('div', { class: 'embed-box' });
+      var ifr = document.createElement('iframe');
+      ifr.src = s.embed; ifr.loading = 'lazy'; ifr.setAttribute('title', '班級作品資料夾'); ifr.setAttribute('allowfullscreen', '');
+      emb.appendChild(ifr);
+      add(card, [h('h3', { class: 'sub-h' }, '班級作品（點影片直接播放）'), emb,
+        h('p', null, h('a', { class: 'btn primary', href: str(s.embedLink || s.embed), target: '_blank', rel: 'noopener' }, '打開班級雲端資料夾 ↗ 上傳作品'))]);
+    }
     cards[idx] = card;
     return card;
   }
