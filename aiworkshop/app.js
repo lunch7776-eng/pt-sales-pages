@@ -140,6 +140,7 @@
     });
     img.src = base + SHOT_EXTS[0];
     fig.appendChild(link);
+    fig.appendChild(h('figcaption', null, '點圖片可以放大看'));
     return fig;
   }
 
@@ -240,11 +241,30 @@
   function promptCard(p) {
     p = p || {};
     var a = str(p.anim || p.real), r = str(p.real || p.anim);
-    var same = a === r;
-    var getText = function () { return same ? a : (state.track === 'real' ? r : a); };
+    var exA = str(p.exAnim || p.exReal), exR = str(p.exReal || p.exAnim);
+    var hasEx = !!(exA || exR) && (exA !== a || exR !== r);
+    var same = a === r && exA === exR;
+    var mode = hasEx ? 'ex' : 'tpl';               // 預設先給「照抄範例」
+    var getText = function () {
+      var useReal = !same && state.track === 'real';
+      if (mode === 'ex') return useReal ? exR : exA;
+      return useReal ? r : a;
+    };
     var pid = safeId(p.id);
     if (pid) PROMPT_INDEX[pid] = { title: str(p.title), short: str(p.title).split('｜')[0].trim() };
-    return h('div', { class: 'prompt-card' + (same ? ' same' : ''), id: pid ? 'prompt-' + pid : null }, [
+    var card = h('div', { class: 'prompt-card' + (same ? ' same' : '') + ' mode-' + mode, id: pid ? 'prompt-' + pid : null });
+    var tabs = null;
+    if (hasEx) {
+      var bEx = h('button', { type: 'button', class: 'ptab on', onclick: function () { setMode('ex'); } }, '照抄範例');
+      var bTpl = h('button', { type: 'button', class: 'ptab', onclick: function () { setMode('tpl'); } }, '自己填');
+      tabs = h('div', { class: 'ptabs', role: 'tablist' }, [bEx, bTpl]);
+    }
+    function setMode(m) {
+      mode = m;
+      card.classList.toggle('mode-ex', m === 'ex'); card.classList.toggle('mode-tpl', m === 'tpl');
+      if (tabs) [].forEach.call(tabs.children, function (b) { b.classList.toggle('on', (b.textContent === '照抄範例') === (m === 'ex')); });
+    }
+    add(card, [
       h('div', { class: 'prompt-head' }, [
         h('h4', { class: 'prompt-title' }, [
           str(p.title) || '提示詞',
@@ -254,10 +274,18 @@
         ].flat()),
         copyBtn(getText)
       ]),
-      same ? h('pre', { class: 'prompt-text' }, a)
-        : [h('pre', { class: 'prompt-text pt-anim' }, a), h('pre', { class: 'prompt-text pt-real' }, r)],
+      tabs,
+      hasEx ? h('p', { class: 'prompt-hint hint-ex' }, '這是填好的範例，可以直接複製貼上。想改成自己的，按「自己填」。') : null,
+      hasEx ? h('p', { class: 'prompt-hint hint-tpl' }, '把（ ）裡的字改成你的，其他不要動。') : null,
+      // 範例版
+      hasEx ? (same ? h('pre', { class: 'prompt-text pt-ex' }, exA)
+        : [h('pre', { class: 'prompt-text pt-ex pt-anim' }, exA), h('pre', { class: 'prompt-text pt-ex pt-real' }, exR)]) : null,
+      // 模板版
+      same ? h('pre', { class: 'prompt-text pt-tpl' }, a)
+        : [h('pre', { class: 'prompt-text pt-tpl pt-anim' }, a), h('pre', { class: 'prompt-text pt-tpl pt-real' }, r)],
       p.note ? h('p', { class: 'prompt-note' }, '小提醒：' + str(p.note)) : null
     ].flat());
+    return card;
   }
 
   function exampleItem(x) {

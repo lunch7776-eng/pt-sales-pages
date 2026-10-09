@@ -341,3 +341,19 @@ details.fold > .fold-body { padding: 0 16px 14px; }
 .prompt-card{scroll-margin-top:140px}
 @keyframes flashCard{0%{box-shadow:0 0 0 0 rgba(26,115,232,.9);background:#e8f0fe}100%{box-shadow:0 0 0 14px rgba(26,115,232,0);background:inherit}}
 .prompt-card.flash{animation:flashCard 2.2s ease-out}
+
+/* 截圖幾乎滿版：文字一列、圖另起一列佔滿 */
+.step.has-shot { grid-template-columns: 44px minmax(0, 1fr); }
+.step.has-shot .shot { grid-column: 2; margin-top: 6px; }
+.shot a { border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,.12); }
+.shot img { width: 100%; height: auto; display: block; }
+.shot figcaption { font-size: 14px; color: var(--muted, #5f6368); margin-top: 6px; }
+
+/* 提示詞卡：照抄範例／自己填 */
+.ptabs { display: flex; gap: 8px; margin: 6px 0 4px; }
+.ptab { border: 1px solid #dadce0; background: #fff; border-radius: 999px; padding: 8px 16px; font-size: 16px; font-weight: 600; min-height: 44px; cursor: pointer; color: #5f6368; }
+.ptab.on { background: #1a73e8; color: #fff; border-color: #1a73e8; }
+.prompt-hint { margin: 2px 0 6px; font-size: 15px; color: #5f6368; }
+.prompt-card.mode-ex .pt-tpl, .prompt-card.mode-ex .hint-tpl { display: none; }
+.prompt-card.mode-tpl .pt-ex, .prompt-card.mode-tpl .hint-ex { display: none; }
+body.track-anim .prompt-card .pt-real, body.track-real .prompt-card .pt-anim { display: none; }
