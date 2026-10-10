@@ -385,3 +385,4 @@ body.track-anim .prompt-card .pt-real, body.track-real .prompt-card .pt-anim { d
 .expect-video{width:100%;max-width:300px;aspect-ratio:9/16;background:#000;border-radius:10px;display:block}
 .expect-text{white-space:pre-wrap;font-family:inherit;font-size:16px;line-height:1.7;background:#fff;border:1px solid #dadce0;border-radius:10px;padding:12px;margin:0}
 .expect-cap{margin:6px 0 0;font-size:14px;color:#5f6368}
+.warn-tag{font-size:12px;background:#fbf2e3;color:#b5761f;border-radius:999px;padding:2px 8px}

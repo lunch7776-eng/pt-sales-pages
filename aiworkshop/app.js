@@ -1,3 +1,4 @@
+if (!Array.prototype.flat) { Array.prototype.flat = function (d) { d = d === undefined ? 1 : d; var out = []; (function f(a, k) { a.forEach(function (x) { if (Array.isArray(x) && k > 0) f(x, k - 1); else out.push(x); }); })(this, d); return out; }; }
 /* AI 短影音工作坊：讀 window.COURSE（content.js）渲染單頁。無外部相依。 */
 (function () {
   'use strict';
@@ -95,13 +96,16 @@
   function copyBtn(getText, label, extraClass) {
     label = label || '複製';
     var btn = h('button', { type: 'button', class: 'btn copy-btn' + (extraClass ? ' ' + extraClass : '') }, label);
-    var t = 0;
+    var t = 0, seq = 0;
     btn.addEventListener('click', function () {
       clearTimeout(t);
+      var my = ++seq;
       copyText(str(getText())).then(function () {
+        if (my !== seq) return;
         btn.textContent = '已複製 ✓';
         btn.className = btn.className.replace(/ ?(done|fail)/g, '') + ' done';
       }, function () {
+        if (my !== seq) return;
         btn.textContent = '請長按文字複製';
         btn.className = btn.className.replace(/ ?(done|fail)/g, '') + ' fail';
       }).then(function () {
@@ -154,7 +158,6 @@
     '4 格分鏡': 'p-board', '四格分鏡': 'p-board', '開頭加強': 'p-hook',
     '場景圖': 'p-scene', '道具圖': 'p-prop', '提示詞模板': 'p-shot-tpl', '鏡頭 prompt 模板': 'p-shot-tpl',
     '固定句': 'p-ban', '修指令四招': 'p-fix4', '分享句': 'p-share', '重做修正': 'p-redo', '接片檢查表': 'p-check',
-    '鏡頭 1': 'p-shot1', '鏡頭 2': 'p-shot2', '鏡頭 3': 'p-shot3', '鏡頭 4': 'p-shot4'
   };
   function allPromptIds() {
     var ids = {};
@@ -270,7 +273,7 @@
     var exA = str(p.exAnim || p.exReal), exR = str(p.exReal || p.exAnim);
     var hasEx = !!(exA || exR) && (exA !== a || exR !== r);
     var same = a === r && exA === exR;
-    var mode = hasEx ? 'ex' : 'tpl';               // 預設先給「照抄範例」
+    var mode = 'tpl';                                // 預設「自己填」，卡住再按「照抄範例」
     var getText = function () {
       var useReal = !same && state.track === 'real';
       if (mode === 'ex') return useReal ? exR : exA;
@@ -281,9 +284,9 @@
     var card = h('div', { class: 'prompt-card' + (same ? ' same' : '') + ' mode-' + mode, id: pid ? 'prompt-' + pid : null });
     var tabs = null;
     if (hasEx) {
-      var bEx = h('button', { type: 'button', class: 'ptab on', onclick: function () { setMode('ex'); } }, '照抄範例');
-      var bTpl = h('button', { type: 'button', class: 'ptab', onclick: function () { setMode('tpl'); } }, '自己填');
-      tabs = h('div', { class: 'ptabs', role: 'tablist' }, [bEx, bTpl]);
+      var bTpl = h('button', { type: 'button', class: 'ptab on', onclick: function () { setMode('tpl'); } }, '自己填');
+      var bEx = h('button', { type: 'button', class: 'ptab', onclick: function () { setMode('ex'); } }, '照抄範例');
+      tabs = h('div', { class: 'ptabs', role: 'tablist' }, [bTpl, bEx]);
     }
     function setMode(m) {
       mode = m;
@@ -301,8 +304,8 @@
         copyBtn(getText)
       ]),
       tabs,
-      hasEx ? h('p', { class: 'prompt-hint hint-ex' }, '這是填好的範例，可以直接複製貼上。想改成自己的，按「自己填」。') : null,
-      hasEx ? h('p', { class: 'prompt-hint hint-tpl' }, '把（ ）裡的字改成你的，其他不要動。') : null,
+      hasEx ? h('p', { class: 'prompt-hint hint-ex' }, '這是用小宇填好的範例。真的卡住才用它，不然影片主角會變成小宇。') : null,
+      hasEx ? h('p', { class: 'prompt-hint hint-tpl' }, '把（ ）裡的字改成你的，其他不要動。卡住就按「照抄範例」看怎麼填。') : null,
       // 範例版
       hasEx ? (same ? h('pre', { class: 'prompt-text pt-ex' }, exA)
         : [h('pre', { class: 'prompt-text pt-ex pt-anim' }, exA), h('pre', { class: 'prompt-text pt-ex pt-real' }, exR)]) : null,
@@ -485,7 +488,7 @@
       h('p', { class: 'models-intro' }, '每個都能用文字生出影片。老師會播 2 到 3 支給大家看。'),
       h('div', { class: 'models-grid', id: 'models-grid' }, h('div', { class: 'models-loading' }, '載入中…'))
     ]);
-    fetch('models.json?v=202610100806').then(function (r) { return r.json(); }).then(function (data) {
+    fetch('models.json?v=202610100820').then(function (r) { return r.json(); }).then(function (data) {
       var grid = box.querySelector('#models-grid'); grid.textContent = '';
       arr(data.models).forEach(function (m) {
         var id = ytId(m.youtube);
@@ -499,7 +502,7 @@
         }
         grid.appendChild(h('article', { class: 'model-card' + (m.id === 'veo' ? ' pick' : '') }, [
           fr ? h('div', { class: 'model-video' }, fr) : null,
-          h('h4', null, [str(m.name), m.id === 'veo' ? h('span', { class: 'pick-tag' }, '我們用這個') : null]),
+          h('h4', null, [str(m.name), m.id === 'veo' ? h('span', { class: 'pick-tag' }, '我們用這個') : null, m.officialNote ? h('span', { class: 'warn-tag', title: str(m.officialNote) }, '示範頻道待確認') : null]),
           h('p', { class: 'model-line' }, str(m.oneLiner)),
           h('ul', { class: 'model-facts' }, [
             h('li', null, [h('b', null, '最厲害：'), str(m.strength)]),
@@ -632,7 +635,7 @@
     if (!u || !u.minutes) return;
     timer.idx = idx;
     timer.endAt = Date.now() + u.minutes * 60000;
-    u.btn.textContent = '停止';
+    u.btn.textContent = '停止並重設';
     u.card.classList.add('timing');
     $('tt-stop').hidden = false;
     $('tt-label').textContent = '計時中：' + str(C.sections[idx].title);
