@@ -13,7 +13,10 @@ window.COURSE = {
       upload: "https://docs.google.com/forms/d/1zhgDm-9geNXfAQgmk2gzDT1xX3ierR80xVEYz5j7cJc/viewform",
       vote: "https://docs.google.com/forms/d/e/1FAIpQLSeD2znibLPPQ2Y7O7XxOVoDqJBZi4pL9mIcdmEepUrv9PSweg/viewform",
       survey: "https://docs.google.com/forms/d/e/1FAIpQLSe2QuFDFvGN3zgIW2zqCnc2iwM_ruKJfbDpzJqPL_LRBpAdEw/viewform",
-      ig: "https://www.instagram.com/ycmagic/"
+      ig: "https://www.instagram.com/ycmagic/",
+      site: "https://lunch7776-eng.github.io/pt-sales-pages/aiworkshop/",
+      pdf: "assets/course-handbook.pdf",
+      pdfName: "AI短影音工作坊_課程手冊.pdf"
     }
   },
 
@@ -71,7 +74,8 @@ window.COURSE = {
       "提示詞卡按「複製」，就能貼到 Gemini 或 Flow。",
       "卡片預設是「照抄範例」，想改成自己的按「自己填」。",
       "截圖點一下可以放大看。",
-      "「講師模式」是老師用的，你不用開。"
+      "「講師模式」是老師用的，你不用開。",
+      "想印出來看，按最上面「下載課程 PDF」。影片要在網站上看。"
     ]
   },
   tracks: {

@@ -129,7 +129,7 @@ if (!Array.prototype.flat) { Array.prototype.flat = function (d) { d = d === und
   function shotFigure(id) {
     var base = 'assets/shots/' + id;
     var fig = h('figure', { class: 'shot' });
-    var img = h('img', { alt: '截圖：' + id, loading: 'lazy', decoding: 'async' });
+    var img = h('img', { alt: '截圖：' + id, loading: PRINT ? 'eager' : 'lazy', decoding: 'async' });
     var link = h('a', { href: base + SHOT_EXTS[0], target: '_blank', rel: 'noopener', 'aria-label': '放大截圖' }, img);
     var tryIdx = 0;
     img.addEventListener('error', function () {
@@ -150,6 +150,8 @@ if (!Array.prototype.flat) { Array.prototype.flat = function (d) { d = d === und
 
 
   // ── 步驟文字自動連結：工具名→外部網站；「提示詞卡名」與關鍵字→跳到該張卡 ──
+  var PRINT = /[?&]print=1/.test(window.location.search);   // ?print=1 → 列印版（產 PDF 用）
+  if (PRINT) document.documentElement.classList.add('print-mode');
   var SINGLE_TRACK = true;   // 2026-10-10 決定：不分兩軌，只走動畫角色；真人演員版改成一張備用卡
   var PROMPT_INDEX = {};
   var KEYWORD_TO_PROMPT = {
@@ -233,6 +235,7 @@ if (!Array.prototype.flat) { Array.prototype.flat = function (d) { d = d === und
     var id = safeId(rawId);
     var fig = h('figure', { class: 'video-box' });
     if (!id) return fig;
+    if (PRINT) { fig.appendChild(h('div', { class: 'video-print' }, ['🎬 ' + (caption || id), h('small', null, '影片請到網站上看')])); return fig; }
     var v = h('video', { controls: true, playsinline: true, preload: 'metadata' });
     v.addEventListener('error', function () {
       fig.replaceChild(h('div', { class: 'video-missing', role: 'img', 'aria-label': '影片準備中' },
@@ -253,8 +256,10 @@ if (!Array.prototype.flat) { Array.prototype.flat = function (d) { d = d === und
       e = e || {};
       var body = null;
       if (e.type === 'image' && e.src) {
-        var im = h('img', { src: 'assets/expect/' + safeId(e.src.replace(/\.[a-z0-9]+$/i, '')) + (e.src.match(/\.[a-z0-9]+$/i) || ['.jpg'])[0], alt: str(e.caption) || '範例輸出', loading: 'lazy' });
+        var im = h('img', { src: 'assets/expect/' + safeId(e.src.replace(/\.[a-z0-9]+$/i, '')) + (e.src.match(/\.[a-z0-9]+$/i) || ['.jpg'])[0], alt: str(e.caption) || '範例輸出', loading: PRINT ? 'eager' : 'lazy' });
         body = h('a', { class: 'expect-img', href: im.getAttribute('src'), target: '_blank', rel: 'noopener' }, im);
+      } else if (e.type === 'video' && e.src && PRINT) {
+        body = h('div', { class: 'video-print' }, ['🎬 範例影片', h('small', null, '影片請到網站上看')]);
       } else if (e.type === 'video' && e.src) {
         var v = h('video', { controls: true, playsinline: true, preload: 'metadata', class: 'expect-video' });
         v.src = /\//.test(e.src) ? e.src : 'assets/videos/' + safeId(e.src.replace(/\.mp4$/i, '')) + '.mp4';
@@ -281,7 +286,7 @@ if (!Array.prototype.flat) { Array.prototype.flat = function (d) { d = d === und
     };
     var pid = safeId(p.id);
     if (pid) PROMPT_INDEX[pid] = { title: str(p.title), short: str(p.title).split('｜')[0].trim() };
-    var card = h('div', { class: 'prompt-card' + (same ? ' same' : '') + ' mode-' + mode, id: pid ? 'prompt-' + pid : null });
+    var card = h('div', { class: 'prompt-card' + (same ? ' same' : '') + (hasEx ? ' has-ex' : '') + ' mode-' + mode, id: pid ? 'prompt-' + pid : null });
     var tabs = null;
     if (hasEx) {
       var bTpl = h('button', { type: 'button', class: 'ptab on', onclick: function () { setMode('tpl'); } }, '自己填');
@@ -364,6 +369,10 @@ if (!Array.prototype.flat) { Array.prototype.flat = function (d) { d = d === und
     var links = (C.meta && C.meta.links) || {};
     var defs = [['gemini', 'Gemini'], ['flow', 'Flow'], ['upload', '上傳作品'], ['drive', '班級作品'], ['vote', '投票'], ['survey', '問卷']];
     var box = $('tb-links');
+    var pdf = str(links.pdf);
+    if (/^assets\/[A-Za-z0-9_.-]+\.pdf$/.test(pdf)) {
+      box.appendChild(h('a', { class: 'btn link-btn pdf-btn', href: pdf, download: str(links.pdfName) || '', target: '_blank', rel: 'noopener' }, '⬇ 下載課程 PDF'));
+    }
     defs.forEach(function (d) {
       var url = safeUrl(links[d[0]]);
       if (!url && d[0] !== 'gemini' && d[0] !== 'flow') return;   // 沒連結就完全不顯示
@@ -449,7 +458,7 @@ if (!Array.prototype.flat) { Array.prototype.flat = function (d) { d = d === und
     if (arr(s.faq).length) {
       add(card, [h('h3', { class: 'sub-h' }, '常見問題'), h('div', { class: 'faq' }, arr(s.faq).map(function (f) {
         f = f || {};
-        return h('details', { class: 'fold' }, [h('summary', null, str(f.q)), h('div', { class: 'fold-body' }, linkify(f.a))]);
+        var dt = h('details', { class: 'fold' }, [h('summary', null, str(f.q)), h('div', { class: 'fold-body' }, linkify(f.a))]); if (PRINT) dt.open = true; return dt;
       }))]);
     }
     var sampleById = {};
@@ -469,9 +478,10 @@ if (!Array.prototype.flat) { Array.prototype.flat = function (d) { d = d === und
     }
     if (s.embed) {
       var emb = h('div', { class: 'embed-box' });
-      var ifr = document.createElement('iframe');
+      if (PRINT) { emb.appendChild(h('div', { class: 'video-print' }, ['📁 班級作品資料夾', h('small', null, '請到網站上點播')])); }
+      else { var ifr = document.createElement('iframe');
       ifr.src = s.embed; ifr.loading = 'lazy'; ifr.setAttribute('title', '班級作品資料夾'); ifr.setAttribute('allowfullscreen', '');
-      emb.appendChild(ifr);
+      emb.appendChild(ifr); }
       add(card, [h('h3', { class: 'sub-h' }, '班級作品（點影片直接播放）'), emb,
         h('p', { class: 'embed-actions' }, [s.uploadLink ? h('a', { class: 'btn primary', href: safeUrl(s.uploadLink), target: '_blank', rel: 'noopener' }, '⬆ 上傳作品') : null, h('a', { class: 'btn', href: str(s.embedLink || s.embed), target: '_blank', rel: 'noopener' }, '打開作品資料夾 ↗')])]);
     }
@@ -488,12 +498,12 @@ if (!Array.prototype.flat) { Array.prototype.flat = function (d) { d = d === und
       h('p', { class: 'models-intro' }, '每個都能用文字生出影片。老師會播 2 到 3 支給大家看。'),
       h('div', { class: 'models-grid', id: 'models-grid' }, h('div', { class: 'models-loading' }, '載入中…'))
     ]);
-    fetch('models.json?v=202610101135').then(function (r) { return r.json(); }).then(function (data) {
+    fetch('models.json?v=202610102217').then(function (r) { return r.json(); }).then(function (data) {
       var grid = box.querySelector('#models-grid'); grid.textContent = '';
       arr(data.models).forEach(function (m) {
         var id = ytId(m.youtube);
         var fr = null;
-        if (id) {
+        if (id && !PRINT) {
           fr = document.createElement('iframe');
           fr.src = 'https://www.youtube-nocookie.com/embed/' + id + '?rel=0';
           fr.setAttribute('title', str(m.name) + ' 官方示範'); fr.setAttribute('loading', 'lazy');
@@ -586,9 +596,31 @@ if (!Array.prototype.flat) { Array.prototype.flat = function (d) { d = d === und
     ]);
   }
 
+  // ── 列印版專用：首頁說明＋連結總表 ──
+  var LINK_NAMES = { site: '教學網站', gemini: 'Gemini', flow: 'Google Flow', upload: '上傳作品（表單）', drive: '班級作品資料夾', vote: '投票表單', survey: '課後問卷', ig: '老師的 Instagram' };
+  function printHead() {
+    var m = C.meta || {}, links = m.links || {};
+    var site = safeUrl(links.site);
+    return h('section', { class: 'card print-head' }, [
+      h('h2', { class: 'sec-title' }, '這是網站的列印版'),
+      h('p', null, '影片、按鈕和複製功能要到網站上用。用手機掃右邊的 QR code，或打這個網址：'),
+      site ? h('p', { class: 'print-url' }, site) : null,
+      h('img', { class: 'print-qr', src: 'assets/qrcode.png', alt: '網站 QR code', width: 180, height: 180 }),
+      h('p', { class: 'print-note' }, '提示詞卡每張都有兩種：「照抄範例」是用小宇填好的；「自己填」要把（ ）裡的字改成你的。')
+    ]);
+  }
+  function printLinks() {
+    var links = (C.meta && C.meta.links) || {};
+    var rows = Object.keys(LINK_NAMES).filter(function (k) { return safeUrl(links[k]); }).map(function (k) {
+      return h('tr', null, [h('th', null, LINK_NAMES[k]), h('td', null, safeUrl(links[k]))]);
+    });
+    return h('section', { class: 'card print-links' }, [h('h2', { class: 'sec-title' }, '所有連結'), h('table', null, rows)]);
+  }
+
   function renderMain() {
     var main = $('main'), list = $('sched-list');
     var secs = arr(C.sections);
+    if (PRINT) main.appendChild(printHead());
     var howto = howtoBlock();
     if (howto) { main.appendChild(howto); list.appendChild(h('li', null, h('a', { class: 'sched-item type-prep', href: '#howto' }, [h('span', { class: 'sched-time' }, '開始前'), h('span', { class: 'sched-title' }, '網站怎麼用')]))); }
     var prep = prepBlock();
@@ -604,6 +636,7 @@ if (!Array.prototype.flat) { Array.prototype.flat = function (d) { d = d === und
         if (sb) { main.appendChild(sb); list.appendChild(navLink('#samples', 'extra', '範例', '', '範例影片')); }
       }
     });
+    if (PRINT) main.appendChild(printLinks());
     var m = C.meta || {};
     $('footer').textContent = [str(m.title), str(m.organizer), str(m.date)].filter(Boolean).join('｜');
   }

@@ -387,3 +387,58 @@ body.track-anim .prompt-card .pt-real, body.track-real .prompt-card .pt-anim { d
 .expect-cap{margin:6px 0 0;font-size:14px;color:#5f6368}
 .warn-tag{font-size:12px;background:#fbf2e3;color:#b5761f;border-radius:999px;padding:2px 8px}
 .embed-actions{display:flex;gap:10px;flex-wrap:wrap}
+
+/* ---------- 列印版（?print=1 → html.print-mode；也套用在 @media print） ---------- */
+.pdf-btn { background: var(--primary); color: #fff; border-color: var(--primary); }
+.video-print { display: grid; place-items: center; align-content: center; gap: 4px; text-align: center; min-height: 90px; padding: 12px; background: #e8eaed; border: 2px dashed #bdc1c6; border-radius: 12px; color: var(--muted); font-weight: 700; }
+.video-print small { font-weight: 400; font-size: 14px; }
+.print-head { position: relative; padding-right: 220px; }
+.print-head .print-url { font-weight: 700; color: var(--primary); word-break: break-all; }
+.print-head .print-qr { position: absolute; right: 24px; top: 24px; width: 180px; height: 180px; }
+.print-note { color: var(--muted); }
+.print-links table { border-collapse: collapse; width: 100%; font-size: 15px; }
+.print-links th, .print-links td { text-align: left; border-bottom: 1px solid var(--line); padding: 8px 6px; vertical-align: top; word-break: break-all; }
+.print-links th { white-space: nowrap; width: 150px; }
+@page { size: A4; margin: 12mm; }
+.print-mode { scroll-behavior: auto; }
+.print-mode body { font-size: 14px; }
+.print-mode .toolbar, .print-mode .skip-link, .print-mode .copy-btn, .print-mode .teacher-box, .print-mode .ptabs,
+.print-mode .now-tag, .print-mode .shot figcaption, .print-mode .copy-all, .print-mode a.btn[href="#samples"] { display: none !important; }
+.print-mode .layout { display: block; max-width: none; padding: 8mm 0 0; }
+.print-mode .schedule { position: static; max-height: none; overflow: visible; margin-bottom: 8mm; break-after: page; }
+.print-mode .sched-item { min-height: 0; padding: 4px 10px; }
+.print-mode .sched-item.is-now { border-left-color: transparent; background: transparent; }
+.print-mode .sched-item.is-now .sched-title::after { content: none; }
+.print-mode .section-card.is-now { border: 1px solid var(--line); box-shadow: none; }
+.print-mode .main { display: block; }
+.print-mode .card, .print-mode .section-card { margin-bottom: 8mm; break-before: page; box-shadow: none; }
+.print-mode .print-head, .print-mode .section-card.type-break, .print-mode .section-card.type-lunch, .print-mode .section-card.minimal { break-before: auto; }
+.print-mode .section-card.type-break, .print-mode .section-card.type-lunch { break-inside: avoid; }
+.print-mode .step, .print-mode .prompt-card, .print-mode .expect-item, .print-mode .model-card, .print-mode details.fold, .print-mode .prep-item, .print-mode .shot, .print-mode .why-flow { break-inside: avoid; }
+.print-mode .sec-title { font-size: 24px; }
+.print-mode .goal { font-size: 19px; }
+.print-mode .sub-h { font-size: 17px; margin: 18px 0 8px; }
+.print-mode .step-text, .print-mode .prep-item .step-text { font-size: 15px; }
+.print-mode .step-num { width: 28px; height: 28px; font-size: 14px; }
+.print-mode .step, .print-mode .step.has-shot { grid-template-columns: 32px minmax(0, 1fr); gap: 8px; }
+.print-mode .steps { gap: 8px; }
+.print-mode .shot a { box-shadow: none; border: 1px solid var(--line); }
+.print-mode .shot img { max-height: 110mm; width: auto; max-width: 100%; margin: 0 auto; }
+.print-mode .prompt-text, .print-mode .expect-text { font-size: 13.5px; line-height: 1.6; padding: 8px 10px; }
+.print-mode .prompt-title { font-size: 16px; }
+.print-mode .prompt-hint { display: none; }
+.print-mode .prompt-card .pt-ex:not(.pt-real), .print-mode .prompt-card .pt-tpl:not(.pt-real) { display: block !important; }
+.print-mode .schedule { display: block !important; }
+.print-mode .howto, .print-mode .prep { break-before: auto; }
+.print-mode .prompt-card.has-ex .pt-ex::before, .print-mode .prompt-card.has-ex .pt-tpl::before { display: block; font-weight: 700; margin-bottom: 4px; }
+.print-mode .prompt-card.has-ex .pt-tpl::before { content: "自己填：把（ ）裡的字改成你的"; color: var(--primary); }
+.print-mode .prompt-card.has-ex .pt-ex::before { content: "照抄範例（小宇版）"; color: var(--real); }
+.print-mode .prompt-card.has-ex .pt-tpl { margin-bottom: 8px; }
+.print-mode .expect-items { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.print-mode .expect-img img { max-height: 90mm; width: auto; max-width: 100%; }
+.print-mode .videos { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.print-mode .models-grid { grid-template-columns: repeat(2, 1fr); }
+.print-mode .step-btn, .print-mode .embed-actions .btn { border: 1px solid var(--line); background: #fff; color: var(--text); }
+.print-mode .step-link { text-decoration: none; color: inherit; font-weight: 600; }
+.print-mode .step-link.ext { color: var(--primary); }
+.print-mode .footer { border: 0; }
