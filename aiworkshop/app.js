@@ -485,7 +485,7 @@
       h('p', { class: 'models-intro' }, '每個都能用文字生出影片。老師會播 2 到 3 支給大家看。'),
       h('div', { class: 'models-grid', id: 'models-grid' }, h('div', { class: 'models-loading' }, '載入中…'))
     ]);
-    fetch('models.json').then(function (r) { return r.json(); }).then(function (data) {
+    fetch('models.json?v=202610100806').then(function (r) { return r.json(); }).then(function (data) {
       var grid = box.querySelector('#models-grid'); grid.textContent = '';
       arr(data.models).forEach(function (m) {
         var id = ytId(m.youtube);
