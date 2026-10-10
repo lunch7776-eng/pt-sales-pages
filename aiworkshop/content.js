@@ -9,7 +9,8 @@ window.COURSE = {
     links: {
       gemini: "https://gemini.google.com",
       flow: "https://labs.google/flow",
-      drive: "https://drive.google.com/drive/folders/1yu6mJ6QQaW7NeM-y-2tzlUfKGPmFe7T9",
+      drive: "https://drive.google.com/drive/folders/1h487LTQUX7a9ksTABgOmmVacuDbcsW2CYi0MXMOo-OsGDAZfODr6rTzcYRpJ4UsRyNuoJAlw",
+      upload: "https://docs.google.com/forms/d/1zhgDm-9geNXfAQgmk2gzDT1xX3ierR80xVEYz5j7cJc/viewform",
       vote: "https://docs.google.com/forms/d/e/1FAIpQLSeD2znibLPPQ2Y7O7XxOVoDqJBZi4pL9mIcdmEepUrv9PSweg/viewform",
       survey: "https://docs.google.com/forms/d/e/1FAIpQLSe2QuFDFvGN3zgIW2zqCnc2iwM_ruKJfbDpzJqPL_LRBpAdEw/viewform",
       ig: "https://www.instagram.com/ycmagic/"
@@ -602,7 +603,7 @@ window.COURSE = {
         { text: "選「720p」，影片會下載到電腦。", shot: "flow-12-download" },
         { text: "把影片改名：「座號_姓名」，例如「05_王小明」。" },
         { text: "找不到檔案？看電腦的「下載」資料夾。" },
-        { text: "打開班級雲端資料夾（上方按鈕），把影片拖進去。" }
+        { text: "按「上傳作品」，填座號和名字，選影片，送出。", link: "upload" }
       ],
       prompts: [
         { id: "p-redo", title: "重做修正",
@@ -634,7 +635,7 @@ window.COURSE = {
         "這段 10 分鐘，講師要在 16:00 前回到台上。"
       ],
       steps: [
-        { text: "確認影片已在班級雲端資料夾裡。" },
+        { text: "確認影片已經上傳（看到「已記錄你的回覆」）。" },
         { text: "15:59 回到座位。" }
       ],
       prompts: [], faq: []
@@ -643,11 +644,12 @@ window.COURSE = {
     /* ---------- 16:00–16:25 ---------- */
     { id: "s17", time: "16:00–16:25", minutes: 25, type: "lesson",
       title: "全班一起看",
-      embed: "https://drive.google.com/embeddedfolderview?id=1yu6mJ6QQaW7NeM-y-2tzlUfKGPmFe7T9#grid",
-      embedLink: "https://drive.google.com/drive/folders/1yu6mJ6QQaW7NeM-y-2tzlUfKGPmFe7T9",
+      embed: "https://drive.google.com/embeddedfolderview?id=1h487LTQUX7a9ksTABgOmmVacuDbcsW2CYi0MXMOo-OsGDAZfODr6rTzcYRpJ4UsRyNuoJAlw#grid",
+      embedLink: "https://drive.google.com/drive/folders/1h487LTQUX7a9ksTABgOmmVacuDbcsW2CYi0MXMOo-OsGDAZfODr6rTzcYRpJ4UsRyNuoJAlw",
+      uploadLink: "https://docs.google.com/forms/d/1zhgDm-9geNXfAQgmk2gzDT1xX3ierR80xVEYz5j7cJc/viewform",
       goal: "一起看大家的影片，選出最愛。",
       teacher: [
-        "在下面的班級雲端資料夾點影片，直接播放。",
+        "下面的班級作品資料夾會自動收到大家上傳的影片，點影片直接播放。",
         "連播全班的影片，每支 32 秒。",
         "學員用手機開投票表單，勾 3 個座號。",
         "投完在表單「回覆」分頁看總票數，只公布票數、不公布誰投誰。",
@@ -657,7 +659,7 @@ window.COURSE = {
         "這段 25 分鐘，講師要在 16:25 前結束。"
       ],
       steps: [
-        { text: "還沒上傳的，現在把影片拖進班級雲端。" },
+        { text: "還沒上傳的，現在按「上傳作品」傳。", link: "upload" },
         { text: "安靜看每一支影片。" },
         { text: "選 3 支你最喜歡的。" },
         { text: "打開「投票表單」，寫名字，勾 3 個座號，送出。", link: "vote" },

@@ -220,7 +220,7 @@ if (!Array.prototype.flat) { Array.prototype.flat = function (d) { d = d === und
       var st = typeof s === 'string' ? { text: s } : (s || {});
       var shot = safeId(st.shot);
       var lk = st.link && C.meta && C.meta.links ? safeUrl(C.meta.links[st.link]) : '';
-      var lkLabel = { vote: '打開投票表單 ↗', survey: '打開課後問卷 ↗', ig: '老師的 Instagram ↗', drive: '打開班級雲端 ↗' }[st.link] || '打開 ↗';
+      var lkLabel = { vote: '打開投票表單 ↗', survey: '打開課後問卷 ↗', ig: '老師的 Instagram ↗', drive: '打開班級雲端 ↗', upload: '⬆ 上傳作品' }[st.link] || '打開 ↗';
       return h('li', { class: 'step' + (shot ? ' has-shot' : '') }, [
         h('span', { class: 'step-num', 'aria-hidden': 'true' }, String(i + 1)),
         h('div', { class: 'step-text' }, [linkify(st.text), lk ? h('div', null, h('a', { class: 'btn primary step-btn', href: lk, target: '_blank', rel: 'noopener' }, lkLabel)) : null].flat()),
@@ -362,11 +362,11 @@ if (!Array.prototype.flat) { Array.prototype.flat = function (d) { d = d === und
 
   function renderToolbar() {
     var links = (C.meta && C.meta.links) || {};
-    var defs = [['gemini', 'Gemini'], ['flow', 'Flow'], ['drive', '班級雲端'], ['vote', '投票'], ['survey', '問卷']];
+    var defs = [['gemini', 'Gemini'], ['flow', 'Flow'], ['upload', '上傳作品'], ['drive', '班級作品'], ['vote', '投票'], ['survey', '問卷']];
     var box = $('tb-links');
     defs.forEach(function (d) {
       var url = safeUrl(links[d[0]]);
-      if (!url && (d[0] === 'drive' || d[0] === 'vote' || d[0] === 'survey')) return;   // 沒連結就完全不顯示
+      if (!url && d[0] !== 'gemini' && d[0] !== 'flow') return;   // 沒連結就完全不顯示
       box.appendChild(url
         ? h('a', { class: 'btn link-btn', href: url, target: '_blank', rel: 'noopener noreferrer' }, [d[1], h('span', { class: 'ext', 'aria-hidden': 'true' }, ' ↗')])
         : h('span', { class: 'btn link-btn disabled', 'aria-disabled': 'true', title: '尚未提供連結' }, d[1]));
@@ -473,7 +473,7 @@ if (!Array.prototype.flat) { Array.prototype.flat = function (d) { d = d === und
       ifr.src = s.embed; ifr.loading = 'lazy'; ifr.setAttribute('title', '班級作品資料夾'); ifr.setAttribute('allowfullscreen', '');
       emb.appendChild(ifr);
       add(card, [h('h3', { class: 'sub-h' }, '班級作品（點影片直接播放）'), emb,
-        h('p', null, h('a', { class: 'btn primary', href: str(s.embedLink || s.embed), target: '_blank', rel: 'noopener' }, '打開班級雲端資料夾 ↗ 上傳作品'))]);
+        h('p', { class: 'embed-actions' }, [s.uploadLink ? h('a', { class: 'btn primary', href: safeUrl(s.uploadLink), target: '_blank', rel: 'noopener' }, '⬆ 上傳作品') : null, h('a', { class: 'btn', href: str(s.embedLink || s.embed), target: '_blank', rel: 'noopener' }, '打開作品資料夾 ↗')])]);
     }
     if (idx === 0) card.appendChild(modelsBlock());
     cards[idx] = card;
@@ -488,7 +488,7 @@ if (!Array.prototype.flat) { Array.prototype.flat = function (d) { d = d === und
       h('p', { class: 'models-intro' }, '每個都能用文字生出影片。老師會播 2 到 3 支給大家看。'),
       h('div', { class: 'models-grid', id: 'models-grid' }, h('div', { class: 'models-loading' }, '載入中…'))
     ]);
-    fetch('models.json?v=202610100820').then(function (r) { return r.json(); }).then(function (data) {
+    fetch('models.json?v=202610101135').then(function (r) { return r.json(); }).then(function (data) {
       var grid = box.querySelector('#models-grid'); grid.textContent = '';
       arr(data.models).forEach(function (m) {
         var id = ytId(m.youtube);
